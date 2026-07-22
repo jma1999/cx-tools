@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 
 import ProjectWorkspace from "./ProjectWorkspace";
 import { getProject } from "../projects/projectConfig";
+import { ProjectProvider } from "../projects/ProjectProvider";
 
 export default function ProjectWorkspacePage() {
   const { projectId } =
@@ -24,6 +25,8 @@ export default function ProjectWorkspacePage() {
   }
 
   return (
-    <ProjectWorkspace project={project} />
+    <ProjectProvider project={project}>
+      <ProjectWorkspace />
+    </ProjectProvider>
   );
 }
