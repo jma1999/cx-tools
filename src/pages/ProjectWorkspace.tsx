@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import FloorPlan from "../features/commissioning/FloorPlan";
 import type { FloorId } from "../features/commissioning/FloorPlan";
 import type { ProjectConfig } from "../projects/projectTypes";
+import { useProject } from "../projects/ProjectProvider";
 
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
@@ -11,12 +12,9 @@ import {
   connectGoogleSheets,
   disconnectGoogleSheets,
   initializeGoogleSheets,
+  createGoogleSheetsRepository,
   type GoogleUser,
 } from "../services/googleSheets";
-
-interface ProjectWorkspaceProps {
-  project: ProjectConfig;
-}
 
 type AuthStatus =
   | "initializing"
@@ -25,11 +23,20 @@ type AuthStatus =
   | "connected"
   | "error";
 
-export default function ProjectWorkspace({
-  project,
-}: ProjectWorkspaceProps) {
-  const [selectedFloor, setSelectedFloor] =
-    useState<FloorId>(project.floors[0].id);
+export default function ProjectWorkspace() {
+  const {
+    project,
+    selectedFloor,
+    setSelectedFloorId,
+  } = useProject();
+
+  const repository = useMemo(
+    () =>
+      createGoogleSheetsRepository(
+        project.spreadsheetId,
+      ),
+    [project.spreadsheetId],
+  );
 
   const { appUser, signOut } = useAuth();
 
@@ -40,11 +47,6 @@ export default function ProjectWorkspace({
     useState<AuthStatus>("initializing");
 
   const [authError, setAuthError] = useState("");
-
-  const selectedFloorConfig =
-    project.floors.find(
-      (floor) => floor.id === selectedFloor,
-    ) ?? project.floors[0];
 
   useEffect(() => {
     async function prepareGoogle(): Promise<void> {
@@ -119,12 +121,12 @@ export default function ProjectWorkspace({
                 type="button"
                 key={floor.id}
                 className={
-                  selectedFloor === floor.id
+                  selectedFloor.id === floor.id
                     ? "active"
                     : ""
                 }
                 onClick={() =>
-                  setSelectedFloor(floor.id)
+                  setSelectedFloorId(floor.id)
                 }
               >
                 {floor.label}
@@ -146,11 +148,12 @@ export default function ProjectWorkspace({
       </nav>
 
       <FloorPlan
-        key={`${project.id}-${selectedFloor}-${googleUser?.email ?? "local"}`}
+        key={`${project.id}-${selectedFloor.id}-${googleUser?.email ?? "local"}`}
         projectId={project.id}
-        floor={selectedFloor}
-        floorDataUrl={selectedFloorConfig.spacesUrl}
-        regionDataUrl={selectedFloorConfig.regionsUrl}
+        floor={selectedFloor.id}
+        floorDataUrl={selectedFloor.spacesUrl}
+        regionDataUrl={selectedFloor.regionsUrl}
+        repository={repository}
         googleUser={googleUser}
         onConnectGoogle={() =>
           void handleConnectGoogle()

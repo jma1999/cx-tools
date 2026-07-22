@@ -8,23 +8,13 @@ import InspectionPanel from "../commissioning/InspectionPanel";
 import TestingPanel, {
   testIssueKey,
 } from "../commissioning/TestingPanel";
-import {
-  addComment,
-  createIssue,
-  loadAssignments,
-  loadComments,
-  loadFloorChecklistResults,
-  loadFloorIssues,
-  resolveIssue,
-  saveChecklistResults,
-  upsertAssignment,
-  loadFloorTestResults,
-  saveTestResults,
-  type SheetTestResult,
-  type GoogleUser,
-  type SheetChecklistResult,
-  type SheetComment,
-  type SheetIssue,
+import type {
+  CommissioningRepository,
+  SheetTestResult,
+  GoogleUser,
+  SheetChecklistResult,
+  SheetComment,
+  SheetIssue,
 } from "../../services/googleSheets";
 import type {
   ChecklistItem,
@@ -50,6 +40,7 @@ interface FloorPlanProps {
   floor: FloorId;
   floorDataUrl: string;
   regionDataUrl: string;
+  repository: CommissioningRepository;
   googleUser: GoogleUser | null;
   onConnectGoogle: () => void;
 }
@@ -443,6 +434,7 @@ export default function FloorPlan({
   floor,
   floorDataUrl,
   regionDataUrl,
+  repository,
   googleUser,
   onConnectGoogle,
 }: FloorPlanProps) {
@@ -597,10 +589,10 @@ export default function FloorPlan({
           cloudTestResults,
           cloudIssues,
         ] = await Promise.all([
-          loadAssignments(floor),
-          loadFloorChecklistResults(floor),
-          loadFloorTestResults(floor),
-          loadFloorIssues(floor),
+          repository.loadAssignments(floor),
+          repository.loadFloorChecklistResults(floor),
+          repository.loadFloorTestResults(floor),
+          repository.loadFloorIssues(floor),
         ]);
 
         if (cancelled) {
@@ -647,7 +639,7 @@ export default function FloorPlan({
     };
     // Sync once when a floor is loaded or the signed-in account changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [floor, googleUser?.email, floorData?.floor, regionData?.floor]);
+  }, [floor, googleUser?.email, floorData?.floor, regionData?.floor, repository]);
 
   const spacesById = useMemo(() => {
     return new Map(
@@ -745,7 +737,7 @@ export default function FloorPlan({
       setCommentsLoading(true);
 
       try {
-        const loadedComments = await loadComments(floor, selectedRegionId);
+        const loadedComments = await repository.loadComments(floor, selectedRegionId);
         if (!cancelled) {
           setComments(loadedComments);
         }
@@ -770,7 +762,7 @@ export default function FloorPlan({
     return () => {
       cancelled = true;
     };
-  }, [floor, googleUser, selectedRegionId]);
+  }, [floor, googleUser, selectedRegionId, repository]);
 
   function selectRegion(region: FloorRegion): void {
     setSelectedRegionId(region.id);
@@ -800,7 +792,7 @@ export default function FloorPlan({
     setSyncMessage("Saving assignment to Google Sheets…");
 
     try {
-      await upsertAssignment({
+      await repository.upsertAssignment({
         floor,
         regionId: selectedRegion.id,
         regionLabel: selectedRegion.label,
@@ -839,7 +831,7 @@ export default function FloorPlan({
     setSyncMessage("Clearing assignment in Google Sheets…");
 
     try {
-      await upsertAssignment({
+      await repository.upsertAssignment({
         floor,
         regionId: selectedRegion.id,
         regionLabel: selectedRegion.label,
@@ -886,10 +878,10 @@ export default function FloorPlan({
         cloudTestResults,
         cloudIssues,
       ] = await Promise.all([
-        loadAssignments(floor),
-        loadFloorChecklistResults(floor),
-        loadFloorTestResults(floor),
-        loadFloorIssues(floor),
+        repository.loadAssignments(floor),
+        repository.loadFloorChecklistResults(floor),
+        repository.loadFloorTestResults(floor),
+        repository.loadFloorIssues(floor),
       ]);
 
       const nextRegions = regionData.regions.map((region) => ({
@@ -929,7 +921,7 @@ export default function FloorPlan({
     setSyncMessage("Saving comment to Google Sheets…");
 
     try {
-      const savedComment = await addComment({
+      const savedComment = await repository.addComment({
         floor,
         regionId: selectedRegion.id,
         spaceId: selectedAssignedSpace?.id ?? "",
@@ -970,7 +962,7 @@ export default function FloorPlan({
     setSyncMessage("Saving inspection results to Google Sheets…");
 
     try {
-      const savedResults = await saveChecklistResults(
+      const savedResults = await repository.saveChecklistResults(
         items.map((item) => ({
           floor,
           spaceId: selectedAssignedSpace.id,
@@ -1006,7 +998,7 @@ export default function FloorPlan({
           continue;
         }
 
-        const savedIssue = await createIssue({
+        const savedIssue = await repository.createIssue({
           floor,
           regionId: selectedRegion.id,
           spaceId: selectedAssignedSpace.id,
@@ -1062,7 +1054,7 @@ export default function FloorPlan({
     setSyncMessage("Saving functional testing results…");
 
     try {
-      const savedResults = await saveTestResults(
+      const savedResults = await repository.saveTestResults(
         results.map((result) => ({
           floor,
           spaceId: selectedAssignedSpace.id,
@@ -1108,7 +1100,7 @@ export default function FloorPlan({
           continue;
         }
 
-        const savedIssue = await createIssue({
+        const savedIssue = await repository.createIssue({
           floor,
           regionId: selectedRegion.id,
           spaceId: selectedAssignedSpace.id,
@@ -1163,7 +1155,7 @@ export default function FloorPlan({
     setSyncMessage("Resolving issue in Google Sheets…");
 
     try {
-      const resolved = await resolveIssue(issue.issueId, googleUser.email);
+      const resolved = await repository.resolveIssue(issue.issueId, googleUser.email);
       const nextIssues = sheetIssues.map((candidate) =>
         candidate.issueId === resolved.issueId ? resolved : candidate,
       );

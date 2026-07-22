@@ -1,7 +1,7 @@
 import type { ChecklistResult } from "../types/commissioning";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-const SPREADSHEET_ID = import.meta.env
+const DEFAULT_SPREADSHEET_ID = import.meta.env
   .VITE_GOOGLE_SPREADSHEET_ID as string | undefined;
 
 const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
@@ -97,6 +97,61 @@ export interface SheetIssue {
   resolvedAt: string;
 }
 
+export interface CommissioningRepository {
+  loadAssignments(
+    floor: string,
+  ): Promise<Record<string, string | null>>;
+
+  upsertAssignment(
+    assignment: Omit<SheetAssignment, "updatedAt" | "revision">,
+  ): Promise<SheetAssignment>;
+
+  loadComments(
+    floor: string,
+    regionId: string,
+  ): Promise<SheetComment[]>;
+
+  addComment(
+    comment: Omit<SheetComment, "commentId" | "createdAt">,
+  ): Promise<SheetComment>;
+
+  loadFloorChecklistResults(
+    floor: string,
+  ): Promise<SheetChecklistResult[]>;
+
+  loadFloorTestResults(
+    floor: string,
+  ): Promise<SheetTestResult[]>;
+
+  saveChecklistResults(
+    inputResults: Array<
+      Omit<SheetChecklistResult, "updatedAt" | "revision">
+    >,
+  ): Promise<SheetChecklistResult[]>;
+
+  saveTestResults(
+    inputResults: Array<
+      Omit<SheetTestResult, "updatedAt" | "revision">
+    >,
+  ): Promise<SheetTestResult[]>;
+
+  loadFloorIssues(
+    floor: string,
+  ): Promise<SheetIssue[]>;
+
+  createIssue(
+    issue: Omit<
+      SheetIssue,
+      "issueId" | "status" | "createdAt" | "resolvedBy" | "resolvedAt"
+    >,
+  ): Promise<SheetIssue>;
+
+  resolveIssue(
+    issueId: string,
+    resolvedBy: string,
+  ): Promise<SheetIssue>;
+}
+
 interface ValueRangeResponse {
   range?: string;
   majorDimension?: string;
@@ -108,17 +163,27 @@ interface BatchUpdateData {
   values: Array<Array<string | number | boolean>>;
 }
 
-function requireConfiguration(): { clientId: string; spreadsheetId: string } {
-  if (!CLIENT_ID || !SPREADSHEET_ID) {
+function requireClientId(): string {
+  if (!CLIENT_ID) {
     throw new Error(
-      "Google Sheets is not configured. Add VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_SPREADSHEET_ID to your .env.local file.",
+      "Google Sheets authorization is not configured. Add VITE_GOOGLE_CLIENT_ID to your .env.local file.",
     );
   }
 
-  return {
-    clientId: CLIENT_ID,
-    spreadsheetId: SPREADSHEET_ID,
-  };
+  return CLIENT_ID;
+}
+
+function resolveSpreadsheetId(spreadsheetId?: string): string {
+  const resolvedId =
+    spreadsheetId?.trim() || DEFAULT_SPREADSHEET_ID?.trim();
+
+  if (!resolvedId) {
+    throw new Error(
+      "No Google spreadsheet is configured for this project.",
+    );
+  }
+
+  return resolvedId;
 }
 
 async function waitForGoogleIdentity(timeoutMs = 10_000): Promise<void> {
@@ -136,7 +201,7 @@ async function waitForGoogleIdentity(timeoutMs = 10_000): Promise<void> {
 }
 
 export async function initializeGoogleSheets(): Promise<void> {
-  requireConfiguration();
+  requireClientId();
   await waitForGoogleIdentity();
 }
 
@@ -145,7 +210,7 @@ export function isGoogleSheetsConnected(): boolean {
 }
 
 export async function connectGoogleSheets(): Promise<GoogleUser> {
-  const { clientId } = requireConfiguration();
+  const clientId = requireClientId();
   await waitForGoogleIdentity();
 
   return new Promise<GoogleUser>((resolve, reject) => {
@@ -346,33 +411,52 @@ async function fetchGoogleUser(): Promise<GoogleUser> {
   };
 }
 
-function rangeUrl(range: string): string {
-  const { spreadsheetId } = requireConfiguration();
-  return `${SHEETS_API_BASE}/${spreadsheetId}/values/${encodeURIComponent(range)}`;
+function rangeUrl(
+  range: string,
+  spreadsheetId?: string,
+): string {
+  const resolvedSpreadsheetId =
+    resolveSpreadsheetId(spreadsheetId);
+
+  return `${SHEETS_API_BASE}/${resolvedSpreadsheetId}/values/${encodeURIComponent(range)}`;
 }
 
-async function getValues(range: string): Promise<ValueRangeResponse> {
-  return authenticatedFetch<ValueRangeResponse>(rangeUrl(range));
+async function getValues(
+  range: string,
+  spreadsheetId?: string,
+): Promise<ValueRangeResponse> {
+  return authenticatedFetch<ValueRangeResponse>(
+    rangeUrl(range, spreadsheetId),
+  );
 }
 
 async function updateValues(
   range: string,
   values: Array<Array<string | number | boolean>>,
+  spreadsheetId?: string,
 ): Promise<void> {
-  await authenticatedFetch(`${rangeUrl(range)}?valueInputOption=RAW`, {
-    method: "PUT",
-    body: JSON.stringify({ values }),
-  });
+  await authenticatedFetch(
+    `${rangeUrl(range, spreadsheetId)}?valueInputOption=RAW`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ values }),
+    },
+  );
 }
 
-async function batchUpdateValues(data: BatchUpdateData[]): Promise<void> {
+async function batchUpdateValues(
+  data: BatchUpdateData[],
+  spreadsheetId?: string,
+): Promise<void> {
   if (data.length === 0) {
     return;
   }
 
-  const { spreadsheetId } = requireConfiguration();
+  const resolvedSpreadsheetId =
+    resolveSpreadsheetId(spreadsheetId);
+
   await authenticatedFetch(
-    `${SHEETS_API_BASE}/${spreadsheetId}/values:batchUpdate`,
+    `${SHEETS_API_BASE}/${resolvedSpreadsheetId}/values:batchUpdate`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -386,13 +470,14 @@ async function batchUpdateValues(data: BatchUpdateData[]): Promise<void> {
 async function appendValues(
   range: string,
   values: Array<Array<string | number | boolean>>,
+  spreadsheetId?: string,
 ): Promise<void> {
   if (values.length === 0) {
     return;
   }
 
   await authenticatedFetch(
-    `${rangeUrl(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+    `${rangeUrl(range, spreadsheetId)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
     {
       method: "POST",
       body: JSON.stringify({ values }),
@@ -434,8 +519,12 @@ function checklistResultValue(value: unknown): ChecklistResult {
 
 export async function loadAssignments(
   floor: string,
+  spreadsheetId?: string,
 ): Promise<Record<string, string | null>> {
-  const response = await getValues("RegionAssignments!A2:I");
+  const response = await getValues(
+    "RegionAssignments!A2:I",
+    spreadsheetId,
+  );
   const assignments: Record<string, string | null> = {};
 
   for (const row of response.values ?? []) {
@@ -456,8 +545,12 @@ export async function loadAssignments(
 
 export async function upsertAssignment(
   assignment: Omit<SheetAssignment, "updatedAt" | "revision">,
+  spreadsheetId?: string,
 ): Promise<SheetAssignment> {
-  const response = await getValues("RegionAssignments!A2:I");
+  const response = await getValues(
+    "RegionAssignments!A2:I",
+    spreadsheetId,
+  );
   const rows = response.values ?? [];
   const existingIndex = rows.findIndex(
     (row) =>
@@ -488,23 +581,32 @@ export async function upsertAssignment(
 
   if (existingIndex >= 0) {
     const sheetRow = existingIndex + 2;
-    await updateValues(`RegionAssignments!A${sheetRow}:I${sheetRow}`, [
-      rowValues,
-    ]);
+    await updateValues(
+      `RegionAssignments!A${sheetRow}:I${sheetRow}`,
+      [rowValues],
+      spreadsheetId,
+    );
   } else {
-    await appendValues("RegionAssignments!A:I", [rowValues]);
+    await appendValues(
+      "RegionAssignments!A:I",
+      [rowValues],
+      spreadsheetId,
+    );
   }
 
-  await appendActivity({
-    eventType: savedAssignment.spaceId
-      ? "assignment_saved"
-      : "assignment_cleared",
-    floor: savedAssignment.floor,
-    regionId: savedAssignment.regionId,
-    spaceId: savedAssignment.spaceId ?? "",
-    user: savedAssignment.updatedBy,
-    payload: savedAssignment,
-  });
+  await appendActivity(
+    {
+      eventType: savedAssignment.spaceId
+        ? "assignment_saved"
+        : "assignment_cleared",
+      floor: savedAssignment.floor,
+      regionId: savedAssignment.regionId,
+      spaceId: savedAssignment.spaceId ?? "",
+      user: savedAssignment.updatedBy,
+      payload: savedAssignment,
+    },
+    spreadsheetId,
+  );
 
   return savedAssignment;
 }
@@ -512,8 +614,12 @@ export async function upsertAssignment(
 export async function loadComments(
   floor: string,
   regionId: string,
+  spreadsheetId?: string,
 ): Promise<SheetComment[]> {
-  const response = await getValues("Comments!A2:I");
+  const response = await getValues(
+    "Comments!A2:I",
+    spreadsheetId,
+  );
 
   return (response.values ?? [])
     .filter(
@@ -537,6 +643,7 @@ export async function loadComments(
 
 export async function addComment(
   comment: Omit<SheetComment, "commentId" | "createdAt">,
+  spreadsheetId?: string,
 ): Promise<SheetComment> {
   const savedComment: SheetComment = {
     ...comment,
@@ -546,36 +653,47 @@ export async function addComment(
     createdAt: new Date().toISOString(),
   };
 
-  await appendValues("Comments!A:I", [
+  await appendValues(
+    "Comments!A:I",
     [
-      savedComment.commentId,
-      savedComment.floor,
-      savedComment.regionId,
-      savedComment.spaceId,
-      savedComment.roomNo,
-      savedComment.comment,
-      savedComment.createdBy,
-      savedComment.createdAt,
-      savedComment.category,
+      [
+        savedComment.commentId,
+        savedComment.floor,
+        savedComment.regionId,
+        savedComment.spaceId,
+        savedComment.roomNo,
+        savedComment.comment,
+        savedComment.createdBy,
+        savedComment.createdAt,
+        savedComment.category,
+      ],
     ],
-  ]);
+    spreadsheetId,
+  );
 
-  await appendActivity({
-    eventType: "comment_added",
-    floor: savedComment.floor,
-    regionId: savedComment.regionId,
-    spaceId: savedComment.spaceId,
-    user: savedComment.createdBy,
-    payload: savedComment,
-  });
+  await appendActivity(
+    {
+      eventType: "comment_added",
+      floor: savedComment.floor,
+      regionId: savedComment.regionId,
+      spaceId: savedComment.spaceId,
+      user: savedComment.createdBy,
+      payload: savedComment,
+    },
+    spreadsheetId,
+  );
 
   return savedComment;
 }
 
 export async function loadFloorChecklistResults(
   floor: string,
+  spreadsheetId?: string,
 ): Promise<SheetChecklistResult[]> {
-  const response = await getValues("ChecklistResults!A2:K");
+  const response = await getValues(
+    "ChecklistResults!A2:K",
+    spreadsheetId,
+  );
 
   return (response.values ?? [])
     .filter((row) => stringValue(row[0]) === floor)
@@ -596,8 +714,12 @@ export async function loadFloorChecklistResults(
 
 export async function loadFloorTestResults(
   floor: string,
+  spreadsheetId?: string,
 ): Promise<SheetTestResult[]> {
-  const response = await getValues("TestResults!A2:K");
+  const response = await getValues(
+    "TestResults!A2:K",
+    spreadsheetId,
+  );
 
   return (response.values ?? [])
     .filter((row) => stringValue(row[0]) === floor)
@@ -620,12 +742,16 @@ export async function saveChecklistResults(
   inputResults: Array<
     Omit<SheetChecklistResult, "updatedAt" | "revision">
   >,
+  spreadsheetId?: string,
 ): Promise<SheetChecklistResult[]> {
   if (inputResults.length === 0) {
     return [];
   }
 
-  const response = await getValues("ChecklistResults!A2:K");
+  const response = await getValues(
+    "ChecklistResults!A2:K",
+    spreadsheetId,
+  );
   const rows = response.values ?? [];
   const now = new Date().toISOString();
   const updates: BatchUpdateData[] = [];
@@ -674,18 +800,25 @@ export async function saveChecklistResults(
     savedResults.push(saved);
   }
 
-  await batchUpdateValues(updates);
-  await appendValues("ChecklistResults!A:K", appends);
+  await batchUpdateValues(updates, spreadsheetId);
+  await appendValues(
+    "ChecklistResults!A:K",
+    appends,
+    spreadsheetId,
+  );
 
   const firstResult = savedResults[0];
-  await appendActivity({
-    eventType: "inspection_saved",
-    floor: firstResult.floor,
-    regionId: "",
-    spaceId: firstResult.spaceId,
-    user: firstResult.updatedBy,
-    payload: savedResults,
-  });
+  await appendActivity(
+    {
+      eventType: "inspection_saved",
+      floor: firstResult.floor,
+      regionId: "",
+      spaceId: firstResult.spaceId,
+      user: firstResult.updatedBy,
+      payload: savedResults,
+    },
+    spreadsheetId,
+  );
 
   return savedResults;
 }
@@ -694,12 +827,16 @@ export async function saveTestResults(
   inputResults: Array<
     Omit<SheetTestResult, "updatedAt" | "revision">
   >,
+  spreadsheetId?: string,
 ): Promise<SheetTestResult[]> {
   if (inputResults.length === 0) {
     return [];
   }
 
-  const response = await getValues("TestResults!A2:K");
+  const response = await getValues(
+    "TestResults!A2:K",
+    spreadsheetId,
+  );
   const rows = response.values ?? [];
   const now = new Date().toISOString();
 
@@ -753,25 +890,38 @@ export async function saveTestResults(
     savedResults.push(saved);
   }
 
-  await batchUpdateValues(updates);
-  await appendValues("TestResults!A:K", appends);
+  await batchUpdateValues(updates, spreadsheetId);
+  await appendValues(
+    "TestResults!A:K",
+    appends,
+    spreadsheetId,
+  );
 
   const firstResult = savedResults[0];
 
-  await appendActivity({
-    eventType: "testing_saved",
-    floor: firstResult.floor,
-    regionId: "",
-    spaceId: firstResult.spaceId,
-    user: firstResult.updatedBy,
-    payload: savedResults,
-  });
+  await appendActivity(
+    {
+      eventType: "testing_saved",
+      floor: firstResult.floor,
+      regionId: "",
+      spaceId: firstResult.spaceId,
+      user: firstResult.updatedBy,
+      payload: savedResults,
+    },
+    spreadsheetId,
+  );
 
   return savedResults;
 }
 
-export async function loadFloorIssues(floor: string): Promise<SheetIssue[]> {
-  const response = await getValues("Issues!A2:L");
+export async function loadFloorIssues(
+  floor: string,
+  spreadsheetId?: string,
+): Promise<SheetIssue[]> {
+  const response = await getValues(
+    "Issues!A2:L",
+    spreadsheetId,
+  );
 
   return (response.values ?? [])
     .filter((row) => stringValue(row[1]) === floor)
@@ -796,6 +946,7 @@ export async function createIssue(
     SheetIssue,
     "issueId" | "status" | "createdAt" | "resolvedBy" | "resolvedAt"
   >,
+  spreadsheetId?: string,
 ): Promise<SheetIssue> {
   const savedIssue: SheetIssue = {
     ...issue,
@@ -808,31 +959,38 @@ export async function createIssue(
     resolvedAt: "",
   };
 
-  await appendValues("Issues!A:L", [
+  await appendValues(
+    "Issues!A:L",
     [
-      savedIssue.issueId,
-      savedIssue.floor,
-      savedIssue.regionId,
-      savedIssue.spaceId,
-      savedIssue.roomNo,
-      savedIssue.checklistItemId,
-      savedIssue.issueDescription,
-      savedIssue.status,
-      savedIssue.createdBy,
-      savedIssue.createdAt,
-      savedIssue.resolvedBy,
-      savedIssue.resolvedAt,
+      [
+        savedIssue.issueId,
+        savedIssue.floor,
+        savedIssue.regionId,
+        savedIssue.spaceId,
+        savedIssue.roomNo,
+        savedIssue.checklistItemId,
+        savedIssue.issueDescription,
+        savedIssue.status,
+        savedIssue.createdBy,
+        savedIssue.createdAt,
+        savedIssue.resolvedBy,
+        savedIssue.resolvedAt,
+      ],
     ],
-  ]);
+    spreadsheetId,
+  );
 
-  await appendActivity({
-    eventType: "issue_created",
-    floor: savedIssue.floor,
-    regionId: savedIssue.regionId,
-    spaceId: savedIssue.spaceId,
-    user: savedIssue.createdBy,
-    payload: savedIssue,
-  });
+  await appendActivity(
+    {
+      eventType: "issue_created",
+      floor: savedIssue.floor,
+      regionId: savedIssue.regionId,
+      spaceId: savedIssue.spaceId,
+      user: savedIssue.createdBy,
+      payload: savedIssue,
+    },
+    spreadsheetId,
+  );
 
   return savedIssue;
 }
@@ -840,8 +998,12 @@ export async function createIssue(
 export async function resolveIssue(
   issueId: string,
   resolvedBy: string,
+  spreadsheetId?: string,
 ): Promise<SheetIssue> {
-  const response = await getValues("Issues!A2:L");
+  const response = await getValues(
+    "Issues!A2:L",
+    spreadsheetId,
+  );
   const rows = response.values ?? [];
   const existingIndex = rows.findIndex(
     (row) => stringValue(row[0]) === issueId,
@@ -868,54 +1030,136 @@ export async function resolveIssue(
   };
 
   const sheetRow = existingIndex + 2;
-  await updateValues(`Issues!A${sheetRow}:L${sheetRow}`, [
+  await updateValues(
+    `Issues!A${sheetRow}:L${sheetRow}`,
     [
-      resolvedIssue.issueId,
-      resolvedIssue.floor,
-      resolvedIssue.regionId,
-      resolvedIssue.spaceId,
-      resolvedIssue.roomNo,
-      resolvedIssue.checklistItemId,
-      resolvedIssue.issueDescription,
-      resolvedIssue.status,
-      resolvedIssue.createdBy,
-      resolvedIssue.createdAt,
-      resolvedIssue.resolvedBy,
-      resolvedIssue.resolvedAt,
+      [
+        resolvedIssue.issueId,
+        resolvedIssue.floor,
+        resolvedIssue.regionId,
+        resolvedIssue.spaceId,
+        resolvedIssue.roomNo,
+        resolvedIssue.checklistItemId,
+        resolvedIssue.issueDescription,
+        resolvedIssue.status,
+        resolvedIssue.createdBy,
+        resolvedIssue.createdAt,
+        resolvedIssue.resolvedBy,
+        resolvedIssue.resolvedAt,
+      ],
     ],
-  ]);
+    spreadsheetId,
+  );
 
-  await appendActivity({
-    eventType: "issue_resolved",
-    floor: resolvedIssue.floor,
-    regionId: resolvedIssue.regionId,
-    spaceId: resolvedIssue.spaceId,
-    user: resolvedBy,
-    payload: resolvedIssue,
-  });
+  await appendActivity(
+    {
+      eventType: "issue_resolved",
+      floor: resolvedIssue.floor,
+      regionId: resolvedIssue.regionId,
+      spaceId: resolvedIssue.spaceId,
+      user: resolvedBy,
+      payload: resolvedIssue,
+    },
+    spreadsheetId,
+  );
 
   return resolvedIssue;
 }
 
-async function appendActivity(input: {
-  eventType: string;
-  floor: string;
-  regionId: string;
-  spaceId: string;
-  user: string;
-  payload: unknown;
-}): Promise<void> {
-  await appendValues("ActivityLog!A:H", [
+async function appendActivity(
+  input: {
+    eventType: string;
+    floor: string;
+    regionId: string;
+    spaceId: string;
+    user: string;
+    payload: unknown;
+  },
+  spreadsheetId?: string,
+): Promise<void> {
+  await appendValues(
+    "ActivityLog!A:H",
     [
-      globalThis.crypto?.randomUUID?.() ??
-        `event-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-      input.eventType,
-      input.floor,
-      input.regionId,
-      input.spaceId,
-      input.user,
-      new Date().toISOString(),
-      JSON.stringify(input.payload),
+      [
+        globalThis.crypto?.randomUUID?.() ??
+          `event-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        input.eventType,
+        input.floor,
+        input.regionId,
+        input.spaceId,
+        input.user,
+        new Date().toISOString(),
+        JSON.stringify(input.payload),
+      ],
     ],
-  ]);
+    spreadsheetId,
+  );
+}
+
+export function createGoogleSheetsRepository(
+  spreadsheetId: string,
+): CommissioningRepository {
+  const resolvedSpreadsheetId =
+    resolveSpreadsheetId(spreadsheetId);
+
+  return {
+    loadAssignments: (floor) =>
+      loadAssignments(floor, resolvedSpreadsheetId),
+
+    upsertAssignment: (assignment) =>
+      upsertAssignment(
+        assignment,
+        resolvedSpreadsheetId,
+      ),
+
+    loadComments: (floor, regionId) =>
+      loadComments(
+        floor,
+        regionId,
+        resolvedSpreadsheetId,
+      ),
+
+    addComment: (comment) =>
+      addComment(comment, resolvedSpreadsheetId),
+
+    loadFloorChecklistResults: (floor) =>
+      loadFloorChecklistResults(
+        floor,
+        resolvedSpreadsheetId,
+      ),
+
+    loadFloorTestResults: (floor) =>
+      loadFloorTestResults(
+        floor,
+        resolvedSpreadsheetId,
+      ),
+
+    saveChecklistResults: (inputResults) =>
+      saveChecklistResults(
+        inputResults,
+        resolvedSpreadsheetId,
+      ),
+
+    saveTestResults: (inputResults) =>
+      saveTestResults(
+        inputResults,
+        resolvedSpreadsheetId,
+      ),
+
+    loadFloorIssues: (floor) =>
+      loadFloorIssues(
+        floor,
+        resolvedSpreadsheetId,
+      ),
+
+    createIssue: (issue) =>
+      createIssue(issue, resolvedSpreadsheetId),
+
+    resolveIssue: (issueId, resolvedBy) =>
+      resolveIssue(
+        issueId,
+        resolvedBy,
+        resolvedSpreadsheetId,
+      ),
+  };
 }
