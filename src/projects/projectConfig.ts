@@ -26,6 +26,24 @@ export const PROJECTS: ProjectConfig[] = [
       },
     ],
   },
+  {
+    id: "test-project",
+    name: "Repository Test Project",
+    code: "Cx-Test",
+    spreadsheetId:
+      import.meta.env
+        .VITE_TEST_SPREADSHEET_ID,
+    floors: [
+      {
+        id: "03",
+        label: "Floor 03",
+        spacesUrl:
+          "/projects/keystone-lighting-cx/data/floor-03-spaces.json",
+        regionsUrl:
+          "/projects/keystone-lighting-cx/data/floor-03-regions.json",
+      },
+    ],
+  },
 ];
 
 export function getProject(

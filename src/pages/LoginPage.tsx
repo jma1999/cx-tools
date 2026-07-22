@@ -1,4 +1,9 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import {
   Navigate,
   useLocation,
@@ -23,6 +28,8 @@ export default function LoginPage() {
     useState("");
   const [signingIn, setSigningIn] =
     useState(false);
+  const signInAttemptRef = useRef(false);
+  const appUserRef = useRef(appUser);
 
   const locationState =
     location.state as LoginLocationState | null;
@@ -30,6 +37,58 @@ export default function LoginPage() {
   const destination =
     locationState?.from ?? "/projects";
 
+  useEffect(() => {
+    appUserRef.current = appUser;
+
+    if (appUser) {
+      signInAttemptRef.current = false;
+      setSigningIn(false);
+    }
+  }, [appUser]);
+
+  useEffect(() => {
+    function handleReturnToPage(): void {
+      if (
+        !signInAttemptRef.current ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      window.setTimeout(() => {
+        if (
+          signInAttemptRef.current &&
+          !appUserRef.current
+        ) {
+          signInAttemptRef.current = false;
+          setSigningIn(false);
+        }
+      }, 700);
+    }
+
+    window.addEventListener(
+      "focus",
+      handleReturnToPage,
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      handleReturnToPage,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "focus",
+        handleReturnToPage,
+      );
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleReturnToPage,
+      );
+    };
+  }, []);
+  
   if (loading) {
     return (
       <div className="route-loading">
@@ -48,6 +107,7 @@ export default function LoginPage() {
   }
 
   async function handleSignIn(): Promise<void> {
+    signInAttemptRef.current = true;
     setSigningIn(true);
     setErrorMessage("");
 
@@ -57,10 +117,8 @@ export default function LoginPage() {
       if (
         error instanceof FirebaseError &&
         (
-          error.code ===
-            "auth/popup-closed-by-user" ||
-          error.code ===
-            "auth/cancelled-popup-request"
+          error.code === "auth/popup-closed-by-user" ||
+          error.code === "auth/cancelled-popup-request"
         )
       ) {
         return;
@@ -72,6 +130,7 @@ export default function LoginPage() {
           : "Sign-in could not be completed.",
       );
     } finally {
+      signInAttemptRef.current = false;
       setSigningIn(false);
     }
   }
@@ -96,9 +155,7 @@ export default function LoginPage() {
           disabled={signingIn}
           onClick={() => void handleSignIn()}
         >
-          {signingIn
-            ? "Signing in…"
-            : "Continue with Google"}
+          {signingIn ? "Signing in…" : "Continue with Google"}
         </button>
 
         {errorMessage && (
