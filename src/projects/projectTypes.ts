@@ -13,5 +13,27 @@ export interface ProjectConfig {
   code: string;
   description?: string;
   spreadsheetId: string;
+  status?: ProjectStatus;
   floors: ProjectFloor[];
+}
+
+export type ProjectRole =
+  | "admin"
+  | "editor"
+  | "viewer";
+
+export type ProjectStatus =
+  | "active"
+  | "archived";
+
+export interface ProjectMembership {
+  projectId: string;
+  role: ProjectRole;
+  active: boolean;
+  email?: string;
+}
+
+export interface AccessibleProject {
+  project: ProjectConfig;
+  membership: ProjectMembership;
 }

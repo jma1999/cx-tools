@@ -11,10 +11,12 @@ import {
 import type {
   ProjectConfig,
   ProjectFloor,
+  ProjectMembership,
 } from "./projectTypes";
 
 interface ProjectContextValue {
   project: ProjectConfig;
+  membership: ProjectMembership;
   selectedFloor: ProjectFloor;
   setSelectedFloorId: (floorId: string) => void;
 }
@@ -26,11 +28,13 @@ const ProjectContext =
 
 interface ProjectProviderProps {
   project: ProjectConfig;
+  membership: ProjectMembership;
   children: ReactNode;
 }
 
 export function ProjectProvider({
   project,
+  membership,
   children,
 }: ProjectProviderProps) {
   const [selectedFloorId, setSelectedFloorIdState] =
@@ -76,11 +80,13 @@ export function ProjectProvider({
   const value = useMemo<ProjectContextValue>(
     () => ({
       project,
+      membership,
       selectedFloor,
       setSelectedFloorId,
     }),
     [
       project,
+      membership,
       selectedFloor,
       setSelectedFloorId,
     ],
