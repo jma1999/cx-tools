@@ -1,31 +1,155 @@
-import { useParams } from "react-router-dom";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Link,
+  useParams,
+} from "react-router-dom";
+
+import { useAuth } from "../auth/AuthProvider";
+
+import {
+  ProjectProvider,
+} from "../projects/ProjectProvider";
+
+import {
+  loadAccessibleProject,
+} from "../projects/projectRepository";
+
+import type {
+  AccessibleProject,
+} from "../projects/projectTypes";
 
 import ProjectWorkspace from "./ProjectWorkspace";
-import { getProject } from "../projects/projectConfig";
-import { ProjectProvider } from "../projects/ProjectProvider";
 
 export default function ProjectWorkspacePage() {
   const { projectId } =
-    useParams<{ projectId: string }>();
+    useParams<{
+      projectId: string;
+    }>();
 
-  const project = getProject(projectId);
+  const { appUser } = useAuth();
 
-  if (!project) {
+  const [
+    projectAccess,
+    setProjectAccess,
+  ] = useState<AccessibleProject | null>(
+    null,
+  );
+
+  const [
+    projectLoading,
+    setProjectLoading,
+  ] = useState(true);
+
+  const [
+    projectError,
+    setProjectError,
+  ] = useState("");
+
+  useEffect(() => {
+    if (
+      !appUser ||
+      !projectId
+    ) {
+      setProjectAccess(null);
+      setProjectLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadProject(): Promise<void> {
+      setProjectLoading(true);
+      setProjectError("");
+
+      try {
+        const loadedAccess =
+          await loadAccessibleProject(
+            appUser.uid,
+            projectId!,
+          );
+
+        if (!cancelled) {
+          setProjectAccess(
+            loadedAccess,
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setProjectError(
+            error instanceof Error
+              ? error.message
+              : "The project could not be loaded.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setProjectLoading(false);
+        }
+      }
+    }
+
+    void loadProject();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    appUser,
+    projectId,
+  ]);
+
+  if (projectLoading) {
     return (
-      <main className="empty-state error-state">
-        <div>
-          <h2>Project not found</h2>
-          <p>
-            The requested project does not exist or
-            is no longer available.
+      <div className="route-loading">
+        Loading project…
+      </div>
+    );
+  }
+
+  if (
+    projectError ||
+    !projectAccess
+  ) {
+    return (
+      <main className="project-access-error">
+        <section>
+          <p className="eyebrow">
+            Project access
           </p>
-        </div>
+
+          <h1>
+            Project unavailable
+          </h1>
+
+          <p>
+            {projectError ||
+              "This project does not exist, is archived, or has not been assigned to your account."}
+          </p>
+
+          <Link
+            to="/projects"
+            className="primary-button"
+          >
+            Return to projects
+          </Link>
+        </section>
       </main>
     );
   }
 
   return (
-    <ProjectProvider project={project}>
+    <ProjectProvider
+      project={
+        projectAccess.project
+      }
+      membership={
+        projectAccess.membership
+      }
+    >
       <ProjectWorkspace />
     </ProjectProvider>
   );
