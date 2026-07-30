@@ -8,6 +8,11 @@ import {
   type ReactNode,
 } from "react";
 
+import {
+  getProjectPermissions,
+  type ProjectPermissions,
+} from "./projectPermissions";
+
 import type {
   ProjectConfig,
   ProjectFloor,
@@ -17,6 +22,7 @@ import type {
 interface ProjectContextValue {
   project: ProjectConfig;
   membership: ProjectMembership;
+  permissions: ProjectPermissions;
   selectedFloor: ProjectFloor;
   setSelectedFloorId: (floorId: string) => void;
 }
@@ -37,6 +43,14 @@ export function ProjectProvider({
   membership,
   children,
 }: ProjectProviderProps) {
+  const permissions = useMemo(
+    () =>
+      getProjectPermissions(
+        membership.role,
+      ),
+    [membership.role],
+  );
+  
   const [selectedFloorId, setSelectedFloorIdState] =
     useState(project.floors[0]?.id ?? "");
 
@@ -81,12 +95,14 @@ export function ProjectProvider({
     () => ({
       project,
       membership,
+      permissions,
       selectedFloor,
       setSelectedFloorId,
     }),
     [
       project,
       membership,
+      permissions,
       selectedFloor,
       setSelectedFloorId,
     ],
