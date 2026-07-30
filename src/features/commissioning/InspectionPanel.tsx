@@ -14,6 +14,7 @@ import type {
 
 interface InspectionPanelProps {
   space: CommissioningSpace;
+  readOnly: boolean;
   region: FloorRegion;
   issues: SheetIssue[];
   comments: SheetComment[];
@@ -70,6 +71,7 @@ export default function InspectionPanel({
   googleConnected,
   saving,
   commentText,
+  readOnly,
   onCommentTextChange,
   onSave,
   onResolveIssue,
@@ -366,6 +368,17 @@ export default function InspectionPanel({
         <p>{space.spaceType}</p>
       </div>
 
+      {readOnly && (
+        <div className="panel-readonly-message">
+          <strong>Read-only access</strong>
+
+          <span>
+            You can review checklist results, but your
+            project role cannot change them.
+          </span>
+        </div>
+      )}
+
       {!googleConnected && (
         <div className="panel-message">
           Connect Google Sheets before saving inspection results.
@@ -411,34 +424,39 @@ export default function InspectionPanel({
         </p>
       )}
 
-      {renderChecklistGroup("Lighting fixtures", lightingItems)}
-      {renderChecklistGroup("Control devices", controlItems)}
-      {renderChecklistGroup("Other checks", otherItems)}
+      <fieldset
+        className="permission-fieldset"
+        disabled={readOnly}
+      >
+        {renderChecklistGroup("Lighting fixtures", lightingItems)}
+        {renderChecklistGroup("Control devices", controlItems)}
+        {renderChecklistGroup("Other checks", otherItems)}
 
-      {draftItems.length === 0 && (
-        <div className="panel-message">
-          No lighting or control items were found for this CSV space.
+        {draftItems.length === 0 && (
+          <div className="panel-message">
+            No lighting or control items were found for this CSV space.
+          </div>
+        )}
+
+        {validationMessage && (
+          <div className="inspection-validation-message">{validationMessage}</div>
+        )}
+
+        <div className="inspection-save-bar">
+          <button
+            type="button"
+            className="primary-button full-width"
+            onClick={validateAndSave}
+            disabled={!googleConnected || saving || draftItems.length === 0}
+          >
+            {saving ? "Saving inspection…" : "Save inspection"}
+          </button>
+          <p>
+            Partial inspections are allowed. The room becomes green only when
+            every item is passed or marked N/A and no issue remains open.
+          </p>
         </div>
-      )}
-
-      {validationMessage && (
-        <div className="inspection-validation-message">{validationMessage}</div>
-      )}
-
-      <div className="inspection-save-bar">
-        <button
-          type="button"
-          className="primary-button full-width"
-          onClick={validateAndSave}
-          disabled={!googleConnected || saving || draftItems.length === 0}
-        >
-          {saving ? "Saving inspection…" : "Save inspection"}
-        </button>
-        <p>
-          Partial inspections are allowed. The room becomes green only when
-          every item is passed or marked N/A and no issue remains open.
-        </p>
-      </div>
+      </fieldset>
 
       <section className="comments-section inspection-comments-section">
         <h3>Room comments</h3>

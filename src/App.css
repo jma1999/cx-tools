@@ -1884,3 +1884,94 @@ button:disabled {
   color: #648b71;
   line-height: 1.55;
 }
+
+.workspace-role {
+  padding: 5px 9px;
+  border: 1px solid #dbe3ee;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.workspace-role-admin {
+  border-color: #bbf7d0;
+  color: #15803d;
+  background: #f0fdf4;
+}
+
+.workspace-role-editor {
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.workspace-role-viewer {
+  border-color: #dbe3ee;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.workspace-readonly-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 9px;
+  border: 1px solid #dbe3ee;
+  border-radius: 999px;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.permission-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.permission-fieldset:disabled {
+  opacity: 0.72;
+}
+
+.permission-fieldset:disabled input,
+.permission-fieldset:disabled textarea,
+.permission-fieldset:disabled select,
+.permission-fieldset:disabled button {
+  cursor: not-allowed;
+}
+
+.panel-readonly-message {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 16px;
+  padding: 11px 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  color: #64748b;
+  background: #f8fafc;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.panel-readonly-message strong {
+  color: #475569;
+  font-size: 11px;
+}
+
+.panel-readonly-message span {
+  display: block;
+}
+
+.workspace-access-summary {
+  margin: 5px 0 0;
+  color: #789584;
+  font-size: 11px;
+}

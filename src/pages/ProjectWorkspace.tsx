@@ -26,6 +26,8 @@ type AuthStatus =
 export default function ProjectWorkspace() {
   const {
     project,
+    membership,
+    permissions,
     selectedFloor,
     setSelectedFloorId,
   } = useProject();
@@ -101,12 +103,29 @@ export default function ProjectWorkspace() {
           <p className="header-description">
             {project.name}
           </p>
+
+          <p className="workspace-access-summary">
+            {membership.role === "admin" &&
+              "Full project and commissioning access."}
+
+            {membership.role === "editor" &&
+              "Commissioning access. Space assignment and project settings are restricted."}
+
+            {membership.role === "viewer" &&
+              "Read-only access to commissioning records."}
+          </p>
         </div>
 
         <div className="header-actions">
           {/* Keep your existing Google connection controls here. */}
           <div className="workspace-app-account">
             <span>{appUser?.email}</span>
+
+            <span
+              className={`workspace-role workspace-role-${membership.role}`}
+            >
+              {membership.role}
+            </span>
 
             <button
               type="button"

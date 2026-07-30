@@ -14,6 +14,7 @@ import type {
 
 interface TestingPanelProps {
   space: CommissioningSpace;
+  readOnly: boolean;
   region: FloorRegion;
   savedResults: SheetTestResult[];
   issues: SheetIssue[];
@@ -89,6 +90,7 @@ export default function TestingPanel({
   issues,
   googleConnected,
   saving,
+  readOnly,
   onSave,
   onResolveIssue,
   onConnect,
@@ -264,6 +266,17 @@ export default function TestingPanel({
         </div>
       </div>
 
+      {readOnly && (
+        <div className="panel-readonly-message">
+          <strong>Read-only access</strong>
+
+          <span>
+            You can review test results, but your
+            project role cannot change them.
+          </span>
+        </div>
+      )}
+
       {!googleConnected && (
         <div className="panel-message">
           Connect Google Sheets before saving test
@@ -285,175 +298,180 @@ export default function TestingPanel({
           the relevant items in the floor spaces JSON.
         </div>
       ) : (
-        groupedResults.map(({ item, tests }) => (
-          <section
-            className="testing-device-group"
-            key={item.id}
-          >
-            <div className="inspection-group-heading">
-              <div>
-                <h3>{item.deviceType}</h3>
-                <span>{item.category}</span>
+        <fieldset
+          className="permission-fieldset"
+          disabled={readOnly}
+        >
+          {groupedResults.map(({ item, tests }) => (
+            <section
+              className="testing-device-group"
+              key={item.id}
+            >
+              <div className="inspection-group-heading">
+                <div>
+                  <h3>{item.deviceType}</h3>
+                  <span>{item.category}</span>
+                </div>
+
+                <span>{tests.length} tests</span>
               </div>
 
-              <span>{tests.length} tests</span>
-            </div>
+              {item.notes && (
+                <div className="fixture-reference-note">
+                  <span>Fixture description</span>
+                  <p>{item.notes}</p>
+                </div>
+              )}
 
-            {item.notes && (
-              <div className="fixture-reference-note">
-                <span>Fixture description</span>
-                <p>{item.notes}</p>
-              </div>
-            )}
+              {item.locationNotes && (
+                <div className="fixture-location-note">
+                  <span>Where to find it</span>
+                  <p>{item.locationNotes}</p>
+                </div>
+              )}
 
-            {item.locationNotes && (
-              <div className="fixture-location-note">
-                <span>Where to find it</span>
-                <p>{item.locationNotes}</p>
-              </div>
-            )}
+              <div className="testing-check-list">
+                {tests.map((result) => {
+                  const issueId = testIssueKey(
+                    result.checklistItemId,
+                    result.testId,
+                  );
 
-            <div className="testing-check-list">
-              {tests.map((result) => {
-                const issueId = testIssueKey(
-                  result.checklistItemId,
-                  result.testId,
-                );
+                  const openIssues =
+                    openIssuesByTest.get(issueId) ?? [];
 
-                const openIssues =
-                  openIssuesByTest.get(issueId) ?? [];
+                  const descriptionKey = resultKey(
+                    result.checklistItemId,
+                    result.testId,
+                  );
 
-                const descriptionKey = resultKey(
-                  result.checklistItemId,
-                  result.testId,
-                );
+                  const definition = item.tests?.find(
+                    (test) => test.id === result.testId,
+                  );
 
-                const definition = item.tests?.find(
-                  (test) => test.id === result.testId,
-                );
+                  return (
+                    <article
+                      className={`testing-check-card result-${result.result}`}
+                      key={descriptionKey}
+                    >
+                      <div className="testing-check-title">
+                        <strong>{result.testLabel}</strong>
 
-                return (
-                  <article
-                    className={`testing-check-card result-${result.result}`}
-                    key={descriptionKey}
-                  >
-                    <div className="testing-check-title">
-                      <strong>{result.testLabel}</strong>
-
-                      {definition?.instructions && (
-                        <p>{definition.instructions}</p>
-                      )}
-                    </div>
-
-                    <div className="result-selector">
-                      {RESULT_OPTIONS.map((option) => (
-                        <button
-                          type="button"
-                          key={option.value}
-                          data-result={option.value}
-                          className={
-                            result.result === option.value
-                              ? "active"
-                              : ""
-                          }
-                          onClick={() =>
-                            chooseResult(
-                              result,
-                              option.value,
-                            )
-                          }
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-
-                      {result.result !== "not_checked" && (
-                        <button
-                          type="button"
-                          className="clear-result-button"
-                          onClick={() =>
-                            chooseResult(
-                              result,
-                              "not_checked",
-                            )
-                          }
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-
-                    <label className="item-notes-field">
-                      <span>Testing notes</span>
-                      <textarea
-                        rows={2}
-                        value={result.notes}
-                        placeholder="Optional observation…"
-                        onChange={(event) =>
-                          updateResult(
-                            result.checklistItemId,
-                            result.testId,
-                            {
-                              notes: event.target.value,
-                            },
-                          )
-                        }
-                      />
-                    </label>
-
-                    {openIssues.map((issue) => (
-                      <div
-                        className="open-issue-card"
-                        key={issue.issueId}
-                      >
-                        <div>
-                          <span>Open issue</span>
-                          <p>{issue.issueDescription}</p>
-                        </div>
-
-                        <button
-                          type="button"
-                          disabled={saving}
-                          onClick={() =>
-                            onResolveIssue(issue)
-                          }
-                        >
-                          Mark resolved
-                        </button>
+                        {definition?.instructions && (
+                          <p>{definition.instructions}</p>
+                        )}
                       </div>
-                    ))}
 
-                    {result.result === "issue" &&
-                      openIssues.length === 0 && (
-                        <label className="issue-description-field">
-                          <span>Issue description</span>
-
-                          <textarea
-                            rows={3}
-                            value={
-                              issueDescriptions[
-                                descriptionKey
-                              ] ?? ""
+                      <div className="result-selector">
+                        {RESULT_OPTIONS.map((option) => (
+                          <button
+                            type="button"
+                            key={option.value}
+                            data-result={option.value}
+                            className={
+                              result.result === option.value
+                                ? "active"
+                                : ""
                             }
-                            placeholder="Describe what failed and what correction is required…"
-                            onChange={(event) =>
-                              setIssueDescriptions(
-                                (current) => ({
-                                  ...current,
-                                  [descriptionKey]:
-                                    event.target.value,
-                                }),
+                            onClick={() =>
+                              chooseResult(
+                                result,
+                                option.value,
                               )
                             }
-                          />
-                        </label>
-                      )}
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        ))
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+
+                        {result.result !== "not_checked" && (
+                          <button
+                            type="button"
+                            className="clear-result-button"
+                            onClick={() =>
+                              chooseResult(
+                                result,
+                                "not_checked",
+                              )
+                            }
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      <label className="item-notes-field">
+                        <span>Testing notes</span>
+                        <textarea
+                          rows={2}
+                          value={result.notes}
+                          placeholder="Optional observation…"
+                          onChange={(event) =>
+                            updateResult(
+                              result.checklistItemId,
+                              result.testId,
+                              {
+                                notes: event.target.value,
+                              },
+                            )
+                          }
+                        />
+                      </label>
+
+                      {openIssues.map((issue) => (
+                        <div
+                          className="open-issue-card"
+                          key={issue.issueId}
+                        >
+                          <div>
+                            <span>Open issue</span>
+                            <p>{issue.issueDescription}</p>
+                          </div>
+
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() =>
+                              onResolveIssue(issue)
+                            }
+                          >
+                            Mark resolved
+                          </button>
+                        </div>
+                      ))}
+
+                      {result.result === "issue" &&
+                        openIssues.length === 0 && (
+                          <label className="issue-description-field">
+                            <span>Issue description</span>
+
+                            <textarea
+                              rows={3}
+                              value={
+                                issueDescriptions[
+                                  descriptionKey
+                                ] ?? ""
+                              }
+                              placeholder="Describe what failed and what correction is required…"
+                              onChange={(event) =>
+                                setIssueDescriptions(
+                                  (current) => ({
+                                    ...current,
+                                    [descriptionKey]:
+                                      event.target.value,
+                                  }),
+                                )
+                              }
+                            />
+                          </label>
+                        )}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </fieldset>
       )}
 
       {validationMessage && (

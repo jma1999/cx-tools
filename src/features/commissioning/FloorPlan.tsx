@@ -25,6 +25,9 @@ import type {
   SpaceStatus,
   TestDraftResult,
 } from "../../types/commissioning";
+import {
+  useProject,
+} from "../../projects/ProjectProvider";
 
 type AppMode = "assign" | "inspect" | "testing";
 export type FloorId = "03" | "04";
@@ -441,6 +444,16 @@ export default function FloorPlan({
   const assignmentStorageKey =
     `lighting-cx-${projectId}-floor-${floor}-region-assignments-v7-cache`;
 
+  const {
+    membership,
+    permissions,
+  } = useProject();
+  const currentModeIsReadOnly =
+    mode === "assign"
+      ? !permissions.canAssignSpaces
+      : mode === "inspect"
+        ? !permissions.canCompleteChecklists
+        : !permissions.canPerformTesting;
   const [floorData, setFloorData] = useState<FloorData | null>(null);
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [checklistResults, setChecklistResults] = useState<
@@ -469,6 +482,18 @@ export default function FloorPlan({
     mode === "testing"
       ? TESTING_STATUS_STYLES
       : STATUS_STYLES;
+
+  useEffect(() => {
+    if (
+      mode === "assign" &&
+      !permissions.canAssignSpaces
+    ) {
+      setMode("inspect");
+    }
+  }, [
+    mode,
+    permissions.canAssignSpaces,
+  ]);    
 
   useEffect(() => {
     async function loadData(): Promise<void> {
@@ -764,6 +789,20 @@ export default function FloorPlan({
     };
   }, [floor, googleUser, selectedRegionId, repository]);
 
+  function requirePermission(
+    allowed: boolean,
+    message: string,
+  ): boolean {
+    if (allowed) {
+      return true;
+    }
+
+    setSyncStatus("error");
+    setSyncMessage(message);
+
+    return false;
+  }
+
   function selectRegion(region: FloorRegion): void {
     setSelectedRegionId(region.id);
     setPendingSpaceId(region.assignedSpaceId ?? "");
@@ -771,6 +810,14 @@ export default function FloorPlan({
   }
 
   async function saveAssignment(): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canAssignSpaces,
+        "Only project administrators can assign spaces.",
+      )
+    ) {
+      return;
+    }
     if (
       !regionData ||
       !selectedRegion ||
@@ -823,6 +870,14 @@ export default function FloorPlan({
   }
 
   async function clearAssignment(): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canAssignSpaces,
+        "Only project administrators can change space assignments.",
+      )
+    ) {
+      return;
+    }
     if (!regionData || !selectedRegion || !googleUser) {
       return;
     }
@@ -913,6 +968,14 @@ export default function FloorPlan({
   async function submitComment(): Promise<void> {
     const trimmedComment = commentText.trim();
 
+    if (
+      !requirePermission(
+        permissions.canAddComments,
+        "Your project role does not allow comments.",
+      )
+    ) {
+      return;
+    }
     if (!googleUser || !selectedRegion || !trimmedComment) {
       return;
     }
@@ -954,6 +1017,14 @@ export default function FloorPlan({
     items: ChecklistItem[],
     issueDescriptions: Record<string, string>,
   ): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canCompleteChecklists,
+        "Your project role does not allow checklist changes.",
+      )
+    ) {
+      return;
+    }
     if (!googleUser || !selectedAssignedSpace || !selectedRegion || !floorData) {
       return;
     }
@@ -985,6 +1056,15 @@ export default function FloorPlan({
           )
           .map((issue) => issue.checklistItemId),
       );
+
+      if (
+        !requirePermission(
+          permissions.canCreateIssues,
+          "Your project role does not allow issue creation.",
+        )
+      ) {
+        return;
+      }
 
       const createdIssues: SheetIssue[] = [];
       for (const item of items) {
@@ -1041,6 +1121,14 @@ export default function FloorPlan({
     results: TestDraftResult[],
     issueDescriptions: Record<string, string>,
   ): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canPerformTesting,
+        "Your project role does not allow testing changes.",
+      )
+    ) {
+      return;
+    }
     if (
       !googleUser ||
       !selectedAssignedSpace ||
@@ -1147,6 +1235,14 @@ export default function FloorPlan({
   }
 
   async function markIssueResolved(issue: SheetIssue): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canResolveIssues,
+        "Your project role does not allow issue resolution.",
+      )
+    ) {
+      return;
+    }
     if (!googleUser || !floorData) {
       return;
     }
@@ -1249,13 +1345,20 @@ export default function FloorPlan({
             <>
               <div className="plan-toolbar">
                 <div className="mode-switcher" aria-label="Application mode">
-                  <button
-                    type="button"
-                    className={mode === "assign" ? "active" : ""}
-                    onClick={() => setMode("assign")}
-                  >
-                    Assign spaces
-                  </button>
+                  {permissions.canAssignSpaces && (
+                    <button
+                      type="button"
+                      className={mode === "assign" ? "active" : ""}
+                      onClick={() => setMode("assign")}
+                    >
+                      Assign spaces
+                    </button>
+                  )}
+                  {currentModeIsReadOnly && (
+                    <span className="workspace-readonly-pill">
+                      Read only
+                    </span>
+                  )}
                   <button
                     type="button"
                     className={mode === "inspect" ? "active" : ""}
@@ -1475,6 +1578,9 @@ export default function FloorPlan({
             onResolveIssue={(issue) => void markIssueResolved(issue)}
             onAddComment={() => void submitComment()}
             onConnect={onConnectGoogle}
+            readOnly={
+              !permissions.canCompleteChecklists
+            }
           />
         ) : mode === "testing" &&
           selectedAssignedSpace &&
@@ -1493,6 +1599,9 @@ export default function FloorPlan({
               void markIssueResolved(issue)
             }
             onConnect={onConnectGoogle}
+            readOnly={
+              !permissions.canPerformTesting
+            }
           />
         ) : (
           <div className="empty-side-panel">
@@ -1640,18 +1749,27 @@ function AssignmentPanel({
             <h3>Assignment comments</h3>
             <textarea
               value={commentText}
-              onChange={(event) => onCommentTextChange(event.target.value)}
-              placeholder="Add an assignment, access, or coordination note…"
-              rows={3}
-              disabled={!googleConnected || saving}
+              disabled={
+                !permissions.canAddComments
+              }
+              onChange={(event) =>
+                setCommentText(
+                  event.target.value,
+                )
+              }
             />
             <button
               type="button"
-              className="secondary-button full-width"
-              onClick={onAddComment}
-              disabled={!commentText.trim() || !googleConnected || saving}
+              disabled={
+                !permissions.canAddComments ||
+                !googleUser ||
+                !commentText.trim()
+              }
+              onClick={() =>
+                void handleAddComment()
+              }
             >
-              Save comment
+              Add comment
             </button>
 
             <div className="comments-list">
