@@ -1,0 +1,98 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasMembership(projectId) {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        )
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        ).data.active == true;
+    }
+
+    function hasRole(projectId, roles) {
+      return hasMembership(projectId)
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        ).data.role in roles;
+    }
+
+    match /projects/{projectId} {
+      /*
+       * Project documents are read individually,
+       * not by listing the entire projects collection.
+       */
+      allow get:
+        if hasMembership(projectId);
+
+      allow list:
+        if false;
+
+      /*
+       * New projects are created manually for now.
+       */
+      allow create:
+        if false;
+
+      allow update, delete:
+        if hasRole(
+          projectId,
+          ["admin"]
+        );
+
+      match /floors/{floorId} {
+        allow read:
+          if hasMembership(projectId);
+
+        allow create, update, delete:
+          if hasRole(
+            projectId,
+            ["admin"]
+          );
+      }
+    }
+
+    match /users/{userId} {
+      allow get:
+        if signedIn()
+        && request.auth.uid == userId;
+
+      allow list:
+        if false;
+
+      allow create, update, delete:
+        if false;
+
+      match /memberships/{projectId} {
+        /*
+         * Users can retrieve their own membership records.
+         */
+        allow get, list:
+          if signedIn()
+          && request.auth.uid == userId;
+
+        /*
+         * An existing project admin may manage
+         * membership records later.
+         */
+        allow create, update, delete:
+          if hasRole(
+            projectId,
+            ["admin"]
+          );
+      }
+    }
+
+    match /{document=**} {
+      allow read, write:
+        if false;
+    }
+  }
+}
