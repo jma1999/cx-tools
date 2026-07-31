@@ -442,7 +442,7 @@ export default function FloorPlan({
   onConnectGoogle,
 }: FloorPlanProps) {
   const assignmentStorageKey =
-    `lighting-cx-${projectId}-floor-${floor}-region-assignments-v8-cache`;
+    `lighting-cx-${projectId}-floor-${floor}-region-assignments-v9-cache`;
 
   const {
     permissions,
