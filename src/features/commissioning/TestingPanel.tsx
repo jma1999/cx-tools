@@ -3,14 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   SheetIssue,
   SheetTestResult,
-} from "../services/googleSheets";
+} from "../../services/googleSheets";
 
 import type {
   ChecklistResult,
   CommissioningSpace,
   FloorRegion,
   TestDraftResult,
-} from "../types/commissioning";
+} from "../../types/commissioning";
 
 interface TestingPanelProps {
   space: CommissioningSpace;
@@ -485,6 +485,7 @@ export default function TestingPanel({
           type="button"
           className="primary-button full-width"
           disabled={
+            readOnly ||
             !googleConnected ||
             saving ||
             draftResults.length === 0
