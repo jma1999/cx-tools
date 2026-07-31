@@ -4,10 +4,10 @@ import {
   TransformWrapper,
 } from "react-zoom-pan-pinch";
 
-import InspectionPanel from "../commissioning/InspectionPanel";
+import InspectionPanel from "./InspectionPanel";
 import TestingPanel, {
   testIssueKey,
-} from "../commissioning/TestingPanel";
+} from "./TestingPanel";
 import type {
   CommissioningRepository,
   SheetTestResult,
@@ -442,18 +442,12 @@ export default function FloorPlan({
   onConnectGoogle,
 }: FloorPlanProps) {
   const assignmentStorageKey =
-    `lighting-cx-${projectId}-floor-${floor}-region-assignments-v7-cache`;
+    `lighting-cx-${projectId}-floor-${floor}-region-assignments-v9-cache`;
 
   const {
-    membership,
     permissions,
   } = useProject();
-  const currentModeIsReadOnly =
-    mode === "assign"
-      ? !permissions.canAssignSpaces
-      : mode === "inspect"
-        ? !permissions.canCompleteChecklists
-        : !permissions.canPerformTesting;
+
   const [floorData, setFloorData] = useState<FloorData | null>(null);
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [checklistResults, setChecklistResults] = useState<
@@ -478,6 +472,12 @@ export default function FloorPlan({
   const [comments, setComments] = useState<SheetComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const currentModeIsReadOnly =
+    mode === "assign"
+      ? !permissions.canAssignSpaces
+      : mode === "inspect"
+        ? !permissions.canCompleteChecklists
+        : !permissions.canPerformTesting;
   const activeStatusStyles =
     mode === "testing"
       ? TESTING_STATUS_STYLES
@@ -1514,7 +1514,7 @@ export default function FloorPlan({
                   borderColor: activeStatusStyles[status].stroke,
                 }}
               />
-              <span>{STATUS_STYLES[status].label}</span>
+              <span>{activeStatusStyles[status].label}</span>
             </div>
           ))}
         </div>
@@ -1747,43 +1747,61 @@ function AssignmentPanel({
 
           <section className="comments-section">
             <h3>Assignment comments</h3>
+
             <textarea
               value={commentText}
               disabled={
-                !permissions.canAddComments
+                !googleConnected ||
+                saving
               }
               onChange={(event) =>
-                setCommentText(
+                onCommentTextChange(
                   event.target.value,
                 )
               }
+              placeholder="Add an assignment or coordination comment…"
+              rows={3}
             />
+
             <button
               type="button"
+              className="secondary-button full-width"
               disabled={
-                !permissions.canAddComments ||
-                !googleUser ||
-                !commentText.trim()
+                !commentText.trim() ||
+                !googleConnected ||
+                saving
               }
-              onClick={() =>
-                void handleAddComment()
-              }
+              onClick={onAddComment}
             >
               Add comment
             </button>
 
             <div className="comments-list">
               {commentsLoading ? (
-                <p className="muted-text">Loading comments…</p>
+                <p className="muted-text">
+                  Loading comments…
+                </p>
               ) : comments.length === 0 ? (
-                <p className="muted-text">No comments for this region.</p>
+                <p className="muted-text">
+                  No comments for this region.
+                </p>
               ) : (
                 comments.map((comment) => (
-                  <article className="comment-card" key={comment.commentId}>
-                    <span className="comment-category">{comment.category}</span>
+                  <article
+                    className="comment-card"
+                    key={comment.commentId}
+                  >
+                    <span className="comment-category">
+                      {comment.category}
+                    </span>
+
                     <p>{comment.comment}</p>
+
                     <span>
-                      {comment.createdBy} · {formatTimestamp(comment.createdAt)}
+                      {comment.createdBy} ·{" "}
+                      {formatTimestamp(
+                        comment.createdAt,
+                      )}
                     </span>
                   </article>
                 ))

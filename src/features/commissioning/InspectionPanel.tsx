@@ -3,14 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   SheetComment,
   SheetIssue,
-} from "../services/googleSheets";
+} from "../../services/googleSheets";
 import type {
   ChecklistItem,
   ChecklistResult,
   CommissioningSpace,
   FloorRegion,
   SpaceStatus,
-} from "../types/commissioning";
+} from "../../types/commissioning";
 
 interface InspectionPanelProps {
   space: CommissioningSpace;
@@ -465,13 +465,13 @@ export default function InspectionPanel({
           onChange={(event) => onCommentTextChange(event.target.value)}
           placeholder="Add a general room, access, coordination, or follow-up note…"
           rows={3}
-          disabled={!googleConnected || saving}
+          disabled={readOnly || !googleConnected || saving}
         />
         <button
           type="button"
           className="secondary-button full-width"
           onClick={onAddComment}
-          disabled={!commentText.trim() || !googleConnected || saving}
+          disabled={readOnly || !commentText.trim() || !googleConnected || saving}
         >
           Save room comment
         </button>
