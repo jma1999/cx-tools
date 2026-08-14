@@ -80,6 +80,39 @@ export interface SheetTestResult {
   revision: number;
 }
 
+export interface SheetPanelTestResult {
+  floor: string;
+  spaceId: string;
+  roomNo: string;
+  regionId: string;
+  panelboard: string;
+  circuitId: string;
+  circuitNo: string;
+  loadDescription: string;
+  result: ChecklistResult;
+  notes: string;
+  updatedBy: string;
+  updatedAt: string;
+  revision: number;
+}
+
+export interface SheetPanelIssue {
+  issueId: string;
+  floor: string;
+  spaceId: string;
+  roomNo: string;
+  regionId: string;
+  panelboard: string;
+  circuitId: string;
+  circuitNo: string;
+  issueDescription: string;
+  status: IssueStatus;
+  createdBy: string;
+  createdAt: string;
+  resolvedBy: string;
+  resolvedAt: string;
+}
+
 export type IssueStatus = "open" | "resolved";
 
 export interface SheetIssue {
@@ -150,6 +183,39 @@ export interface CommissioningRepository {
     issueId: string,
     resolvedBy: string,
   ): Promise<SheetIssue>;
+
+  loadFloorPanelTestResults(
+    floor: string,
+  ): Promise<SheetPanelTestResult[]>;
+
+  savePanelTestResults(
+    inputResults: Array<
+      Omit<
+        SheetPanelTestResult,
+        "updatedAt" | "revision"
+      >
+    >,
+  ): Promise<SheetPanelTestResult[]>;
+
+  loadFloorPanelIssues(
+    floor: string,
+  ): Promise<SheetPanelIssue[]>;
+
+  createPanelIssue(
+    issue: Omit<
+      SheetPanelIssue,
+      | "issueId"
+      | "status"
+      | "createdAt"
+      | "resolvedBy"
+      | "resolvedAt"
+    >,
+  ): Promise<SheetPanelIssue>;
+
+  resolvePanelIssue(
+    issueId: string,
+    resolvedBy: string,
+  ): Promise<SheetPanelIssue>;
 }
 
 interface ValueRangeResponse {
@@ -738,6 +804,200 @@ export async function loadFloorTestResults(
     }));
 }
 
+export async function loadFloorPanelTestResults(
+  floor: string,
+  spreadsheetId?: string,
+): Promise<SheetPanelTestResult[]> {
+  const response = await getValues(
+    "PanelTestResults!A2:M",
+    spreadsheetId,
+  );
+
+  return (response.values ?? [])
+    .filter(
+      (row) =>
+        stringValue(row[0]) === floor,
+    )
+    .map((row) => ({
+      floor: stringValue(row[0]),
+
+      spaceId: stringValue(row[1]),
+      roomNo: stringValue(row[2]),
+      regionId: stringValue(row[3]),
+
+      panelboard: stringValue(row[4]),
+
+      circuitId: stringValue(row[5]),
+      circuitNo: stringValue(row[6]),
+      loadDescription:
+        stringValue(row[7]),
+
+      result:
+        checklistResultValue(row[8]),
+
+      notes: stringValue(row[9]),
+
+      updatedBy:
+        stringValue(row[10]),
+
+      updatedAt:
+        stringValue(row[11]),
+
+      revision:
+        numberValue(row[12]),
+    }));
+}
+
+export async function savePanelTestResults(
+  inputResults: Array<
+    Omit<
+      SheetPanelTestResult,
+      "updatedAt" | "revision"
+    >
+  >,
+  spreadsheetId?: string,
+): Promise<SheetPanelTestResult[]> {
+  if (inputResults.length === 0) {
+    return [];
+  }
+
+  const response = await getValues(
+    "PanelTestResults!A2:M",
+    spreadsheetId,
+  );
+
+  const rows =
+    response.values ?? [];
+
+  const now =
+    new Date().toISOString();
+
+  const updates:
+    BatchUpdateData[] = [];
+
+  const appends:
+    Array<
+      Array<
+        string | number | boolean
+      >
+    > = [];
+
+  const savedResults:
+    SheetPanelTestResult[] = [];
+
+  for (const input of inputResults) {
+    /*
+     * One result per:
+     *
+     * floor + sampled space + circuit
+     */
+    const existingIndex =
+      rows.findIndex(
+        (row) =>
+          stringValue(row[0]) ===
+            input.floor &&
+          stringValue(row[1]) ===
+            input.spaceId &&
+          stringValue(row[5]) ===
+            input.circuitId,
+      );
+
+    const saved:
+      SheetPanelTestResult = {
+      ...input,
+
+      updatedAt: now,
+
+      revision:
+        existingIndex >= 0
+          ? numberValue(
+              rows[existingIndex][12],
+            ) + 1
+          : 1,
+    };
+
+    const values:
+      Array<
+        string | number | boolean
+      > = [
+      saved.floor,
+
+      saved.spaceId,
+      saved.roomNo,
+      saved.regionId,
+
+      saved.panelboard,
+
+      saved.circuitId,
+      saved.circuitNo,
+      saved.loadDescription,
+
+      saved.result,
+      saved.notes,
+
+      saved.updatedBy,
+      saved.updatedAt,
+
+      saved.revision,
+    ];
+
+    if (existingIndex >= 0) {
+      const sheetRow =
+        existingIndex + 2;
+
+      updates.push({
+        range:
+          `PanelTestResults!A${sheetRow}:M${sheetRow}`,
+
+        values: [values],
+      });
+    } else {
+      appends.push(values);
+    }
+
+    savedResults.push(saved);
+  }
+
+  await batchUpdateValues(
+    updates,
+    spreadsheetId,
+  );
+
+  await appendValues(
+    "PanelTestResults!A:M",
+    appends,
+    spreadsheetId,
+  );
+
+  const firstResult =
+    savedResults[0];
+
+  await appendActivity(
+    {
+      eventType:
+        "panel_testing_saved",
+
+      floor:
+        firstResult.floor,
+
+      regionId:
+        firstResult.regionId,
+
+      spaceId:
+        firstResult.spaceId,
+
+      user:
+        firstResult.updatedBy,
+
+      payload:
+        savedResults,
+    },
+    spreadsheetId,
+  );
+
+  return savedResults;
+}
+
 export async function saveChecklistResults(
   inputResults: Array<
     Omit<SheetChecklistResult, "updatedAt" | "revision">
@@ -941,6 +1201,68 @@ export async function loadFloorIssues(
     }));
 }
 
+export async function loadFloorPanelIssues(
+  floor: string,
+  spreadsheetId?: string,
+): Promise<SheetPanelIssue[]> {
+  const response = await getValues(
+    "PanelIssues!A2:N",
+    spreadsheetId,
+  );
+
+  return (response.values ?? [])
+    .filter(
+      (row) =>
+        stringValue(row[1]) === floor,
+    )
+    .map((row) => ({
+      issueId:
+        stringValue(row[0]),
+
+      floor:
+        stringValue(row[1]),
+
+      spaceId:
+        stringValue(row[2]),
+
+      roomNo:
+        stringValue(row[3]),
+
+      regionId:
+        stringValue(row[4]),
+
+      panelboard:
+        stringValue(row[5]),
+
+      circuitId:
+        stringValue(row[6]),
+
+      circuitNo:
+        stringValue(row[7]),
+
+      issueDescription:
+        stringValue(row[8]),
+
+      status:
+        stringValue(row[9]) ===
+        "resolved"
+          ? "resolved"
+          : "open",
+
+      createdBy:
+        stringValue(row[10]),
+
+      createdAt:
+        stringValue(row[11]),
+
+      resolvedBy:
+        stringValue(row[12]),
+
+      resolvedAt:
+        stringValue(row[13]),
+    }));
+}
+
 export async function createIssue(
   issue: Omit<
     SheetIssue,
@@ -988,6 +1310,94 @@ export async function createIssue(
       spaceId: savedIssue.spaceId,
       user: savedIssue.createdBy,
       payload: savedIssue,
+    },
+    spreadsheetId,
+  );
+
+  return savedIssue;
+}
+
+export async function createPanelIssue(
+  issue: Omit<
+    SheetPanelIssue,
+    | "issueId"
+    | "status"
+    | "createdAt"
+    | "resolvedBy"
+    | "resolvedAt"
+  >,
+  spreadsheetId?: string,
+): Promise<SheetPanelIssue> {
+  const savedIssue:
+    SheetPanelIssue = {
+    ...issue,
+
+    issueId:
+      globalThis.crypto
+        ?.randomUUID?.() ??
+      `panel-issue-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 10)}`,
+
+    status: "open",
+
+    createdAt:
+      new Date().toISOString(),
+
+    resolvedBy: "",
+    resolvedAt: "",
+  };
+
+  await appendValues(
+    "PanelIssues!A:N",
+    [
+      [
+        savedIssue.issueId,
+
+        savedIssue.floor,
+
+        savedIssue.spaceId,
+        savedIssue.roomNo,
+        savedIssue.regionId,
+
+        savedIssue.panelboard,
+
+        savedIssue.circuitId,
+        savedIssue.circuitNo,
+
+        savedIssue.issueDescription,
+
+        savedIssue.status,
+
+        savedIssue.createdBy,
+        savedIssue.createdAt,
+
+        savedIssue.resolvedBy,
+        savedIssue.resolvedAt,
+      ],
+    ],
+    spreadsheetId,
+  );
+
+  await appendActivity(
+    {
+      eventType:
+        "panel_issue_created",
+
+      floor:
+        savedIssue.floor,
+
+      regionId:
+        savedIssue.regionId,
+
+      spaceId:
+        savedIssue.spaceId,
+
+      user:
+        savedIssue.createdBy,
+
+      payload:
+        savedIssue,
     },
     spreadsheetId,
   );
@@ -1059,6 +1469,138 @@ export async function resolveIssue(
       spaceId: resolvedIssue.spaceId,
       user: resolvedBy,
       payload: resolvedIssue,
+    },
+    spreadsheetId,
+  );
+
+  return resolvedIssue;
+}
+
+export async function resolvePanelIssue(
+  issueId: string,
+  resolvedBy: string,
+  spreadsheetId?: string,
+): Promise<SheetPanelIssue> {
+  const response = await getValues(
+    "PanelIssues!A2:N",
+    spreadsheetId,
+  );
+
+  const rows =
+    response.values ?? [];
+
+  const existingIndex =
+    rows.findIndex(
+      (row) =>
+        stringValue(row[0]) ===
+        issueId,
+    );
+
+  if (existingIndex < 0) {
+    throw new Error(
+      "The selected panel issue could not be found in Google Sheets.",
+    );
+  }
+
+  const row =
+    rows[existingIndex];
+
+  const resolvedIssue:
+    SheetPanelIssue = {
+    issueId:
+      stringValue(row[0]),
+
+    floor:
+      stringValue(row[1]),
+
+    spaceId:
+      stringValue(row[2]),
+
+    roomNo:
+      stringValue(row[3]),
+
+    regionId:
+      stringValue(row[4]),
+
+    panelboard:
+      stringValue(row[5]),
+
+    circuitId:
+      stringValue(row[6]),
+
+    circuitNo:
+      stringValue(row[7]),
+
+    issueDescription:
+      stringValue(row[8]),
+
+    status: "resolved",
+
+    createdBy:
+      stringValue(row[10]),
+
+    createdAt:
+      stringValue(row[11]),
+
+    resolvedBy,
+
+    resolvedAt:
+      new Date().toISOString(),
+  };
+
+  const sheetRow =
+    existingIndex + 2;
+
+  await updateValues(
+    `PanelIssues!A${sheetRow}:N${sheetRow}`,
+    [
+      [
+        resolvedIssue.issueId,
+
+        resolvedIssue.floor,
+
+        resolvedIssue.spaceId,
+        resolvedIssue.roomNo,
+        resolvedIssue.regionId,
+
+        resolvedIssue.panelboard,
+
+        resolvedIssue.circuitId,
+        resolvedIssue.circuitNo,
+
+        resolvedIssue.issueDescription,
+
+        resolvedIssue.status,
+
+        resolvedIssue.createdBy,
+        resolvedIssue.createdAt,
+
+        resolvedIssue.resolvedBy,
+        resolvedIssue.resolvedAt,
+      ],
+    ],
+    spreadsheetId,
+  );
+
+  await appendActivity(
+    {
+      eventType:
+        "panel_issue_resolved",
+
+      floor:
+        resolvedIssue.floor,
+
+      regionId:
+        resolvedIssue.regionId,
+
+      spaceId:
+        resolvedIssue.spaceId,
+
+      user:
+        resolvedBy,
+
+      payload:
+        resolvedIssue,
     },
     spreadsheetId,
   );
@@ -1161,5 +1703,44 @@ export function createGoogleSheetsRepository(
         resolvedBy,
         resolvedSpreadsheetId,
       ),
+    
+    loadFloorPanelTestResults:
+      (floor) =>
+        loadFloorPanelTestResults(
+          floor,
+          resolvedSpreadsheetId,
+        ),
+
+    savePanelTestResults:
+      (inputResults) =>
+        savePanelTestResults(
+          inputResults,
+          resolvedSpreadsheetId,
+        ),
+
+    loadFloorPanelIssues:
+      (floor) =>
+        loadFloorPanelIssues(
+          floor,
+          resolvedSpreadsheetId,
+        ),
+
+    createPanelIssue:
+      (issue) =>
+        createPanelIssue(
+          issue,
+          resolvedSpreadsheetId,
+        ),
+
+    resolvePanelIssue:
+      (
+        issueId,
+        resolvedBy,
+      ) =>
+        resolvePanelIssue(
+          issueId,
+          resolvedBy,
+          resolvedSpreadsheetId,
+        ),
   };
 }
