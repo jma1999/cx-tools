@@ -10,7 +10,7 @@
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
       "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
-      "notes": "Sampled room for panelboard circuit verification.",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
           "id": "314-circuit-r3a-21",

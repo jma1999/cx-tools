@@ -16,6 +16,8 @@ import type {
   SheetChecklistResult,
   SheetComment,
   SheetIssue,
+  SheetPanelTestResult,
+  SheetPanelIssue,
 } from "../../services/googleSheets";
 import type {
   ChecklistItem,
@@ -356,6 +358,56 @@ function mergeTestResults(
   return merged;
 }
 
+function mergePanelTestResults(
+  existing:
+    SheetPanelTestResult[],
+
+  saved:
+    SheetPanelTestResult[],
+): SheetPanelTestResult[] {
+  const savedByKey =
+    new Map(
+      saved.map(
+        (result) => [
+          `${result.floor}::${result.spaceId}::${result.circuitId}`,
+          result,
+        ],
+      ),
+    );
+
+  const merged =
+    existing.map((result) => {
+      const key =
+        `${result.floor}::${result.spaceId}::${result.circuitId}`;
+
+      return (
+        savedByKey.get(key) ??
+        result
+      );
+    });
+
+  const existingKeys =
+    new Set(
+      existing.map(
+        (result) =>
+          `${result.floor}::${result.spaceId}::${result.circuitId}`,
+      ),
+    );
+
+  for (const result of saved) {
+    const key =
+      `${result.floor}::${result.spaceId}::${result.circuitId}`;
+
+    if (
+      !existingKeys.has(key)
+    ) {
+      merged.push(result);
+    }
+  }
+
+  return merged;
+}
+
 function calculateTestingStatus(
   space: CommissioningSpace,
   results: SheetTestResult[],
@@ -436,6 +488,111 @@ function calculateTestingStatus(
   return "in_progress";
 }
 
+function calculatePanelTestingStatus(
+  space: PanelTestSpace,
+
+  results:
+    SheetPanelTestResult[],
+
+  issues:
+    SheetPanelIssue[],
+): SpaceStatus {
+  if (
+    space.circuits.length === 0
+  ) {
+    return "not_applicable";
+  }
+
+  const hasOpenIssue =
+    issues.some(
+      (issue) =>
+        issue.spaceId ===
+          space.id &&
+        issue.status === "open",
+    );
+
+  if (hasOpenIssue) {
+    return "issue";
+  }
+
+  const resultsByCircuit =
+    new Map(
+      results
+        .filter(
+          (result) =>
+            result.spaceId ===
+            space.id,
+        )
+        .map((result) => [
+          result.circuitId,
+          result,
+        ]),
+    );
+
+  const relevantResults =
+    space.circuits.map(
+      (circuit) =>
+        resultsByCircuit.get(
+          circuit.id,
+        ),
+    );
+
+  if (
+    relevantResults.some(
+      (result) =>
+        result?.result ===
+        "issue",
+    )
+  ) {
+    return "issue";
+  }
+
+  const completed =
+    relevantResults.filter(
+      (result) =>
+        result &&
+        result.result !==
+          "not_checked",
+    );
+
+  if (
+    completed.length === 0
+  ) {
+    return "not_inspected";
+  }
+
+  if (
+    completed.length <
+    space.circuits.length
+  ) {
+    return "in_progress";
+  }
+
+  if (
+    relevantResults.every(
+      (result) =>
+        result?.result ===
+        "not_applicable",
+    )
+  ) {
+    return "not_applicable";
+  }
+
+  if (
+    relevantResults.every(
+      (result) =>
+        result?.result ===
+          "pass" ||
+        result?.result ===
+          "not_applicable",
+    )
+  ) {
+    return "passed";
+  }
+
+  return "in_progress";
+}
+
 export default function FloorPlan({
   projectId,
   floor,
@@ -461,6 +618,18 @@ export default function FloorPlan({
   >([]);
   const [testResults, setTestResults] = useState<
     SheetTestResult[]
+  >([]);
+  const [
+    panelTestResults,
+    setPanelTestResults,
+  ] = useState<
+    SheetPanelTestResult[]
+  >([]);
+  const [
+    panelIssues,
+    setPanelIssues,
+  ] = useState<
+    SheetPanelIssue[]
   >([]);
   const [sheetIssues, setSheetIssues] = useState<SheetIssue[]>([]);
   const [mode, setMode] = useState<AppMode>("inspect");
@@ -514,6 +683,8 @@ export default function FloorPlan({
       setChecklistResults([]);
       setTestResults([]);
       setSheetIssues([]);
+      setPanelTestResults([]);
+      setPanelIssues([]);
 
       try {
         const [floorResponse, regionResponse] = await Promise.all([
@@ -679,11 +850,15 @@ export default function FloorPlan({
           cloudResults,
           cloudTestResults,
           cloudIssues,
+          cloudPanelTestResults,
+          cloudPanelIssues,
         ] = await Promise.all([
           repository.loadAssignments(floor),
           repository.loadFloorChecklistResults(floor),
           repository.loadFloorTestResults(floor),
           repository.loadFloorIssues(floor),
+          repository.loadFloorPanelTestResults(floor),
+          repository.loadFloorPanelIssues(floor),
         ]);
 
         if (cancelled) {
@@ -706,6 +881,8 @@ export default function FloorPlan({
         setChecklistResults(cloudResults);
         setTestResults(cloudTestResults);
         setSheetIssues(cloudIssues);
+        setPanelTestResults(cloudPanelTestResults);
+        setPanelIssues(cloudPanelIssues);
         setFloorData(applyInspectionData(floorData, cloudResults, cloudIssues));
         setSyncStatus("synced");
         setSyncMessage(`Shared data synced as ${googleUser.email}.`);
@@ -774,6 +951,40 @@ export default function FloorPlan({
       );
     }, [panelTestData]);
 
+  const panelTestingStatusByRegionId =
+    useMemo(() => {
+      const statuses =
+        new Map<
+          string,
+          SpaceStatus
+        >();
+
+      for (
+        const space of
+        panelTestData?.spaces ?? []
+      ) {
+        if (!space.regionId) {
+          continue;
+        }
+
+        statuses.set(
+          space.regionId,
+
+          calculatePanelTestingStatus(
+            space,
+            panelTestResults,
+            panelIssues,
+          ),
+        );
+      }
+
+      return statuses;
+    }, [
+      panelTestData,
+      panelTestResults,
+      panelIssues,
+    ]);
+
   const availableSpaces = useMemo(() => {
     if (!floorData) {
       return [];
@@ -833,6 +1044,24 @@ export default function FloorPlan({
           result.spaceId === selectedAssignedSpace.id,
       )
     : [];
+
+  const selectedPanelTestResults =
+    selectedPanelSpace
+      ? panelTestResults.filter(
+          (result) =>
+            result.spaceId ===
+            selectedPanelSpace.id,
+        )
+      : [];
+
+  const selectedPanelIssues =
+    selectedPanelSpace
+      ? panelIssues.filter(
+          (issue) =>
+            issue.spaceId ===
+            selectedPanelSpace.id,
+        )
+      : [];
 
   const selectedPanelSpace =
     selectedRegionId
@@ -1023,11 +1252,15 @@ export default function FloorPlan({
         cloudResults,
         cloudTestResults,
         cloudIssues,
+        cloudPanelTestResults,
+        cloudPanelIssues,
       ] = await Promise.all([
         repository.loadAssignments(floor),
         repository.loadFloorChecklistResults(floor),
         repository.loadFloorTestResults(floor),
         repository.loadFloorIssues(floor),
+        repository.loadFloorPanelTestResults(floor),
+        repository.loadFloorPanelIssues(floor),
       ]);
 
       const nextRegions = regionData.regions.map((region) => ({
@@ -1043,6 +1276,8 @@ export default function FloorPlan({
       setChecklistResults(cloudResults);
       setTestResults(cloudTestResults);
       setSheetIssues(cloudIssues);
+      setPanelTestResults(cloudPanelTestResults);
+      setPanelIssues(cloudPanelIssues);
       setFloorData(applyInspectionData(floorData, cloudResults, cloudIssues));
       setSyncStatus("synced");
       setSyncMessage("Latest Google Sheet data loaded.");
@@ -1325,6 +1560,193 @@ export default function FloorPlan({
     }
   }
 
+  async function savePanelTesting(
+    results:
+      PanelTestDraftResult[],
+
+    issueDescriptions:
+      Record<string, string>,
+  ): Promise<void> {
+    if (
+      !requirePermission(
+        permissions
+          .canPerformPanelTesting,
+
+        "Your project role does not allow electrical panel testing changes.",
+      )
+    ) {
+      return;
+    }
+
+    if (
+      !googleUser ||
+      !selectedPanelSpace ||
+      !selectedRegion
+    ) {
+      return;
+    }
+
+    setSyncStatus("saving");
+
+    setSyncMessage(
+      "Saving electrical panel testing results…",
+    );
+
+    try {
+      const savedResults =
+        await repository
+          .savePanelTestResults(
+            results.map(
+              (result) => ({
+                floor,
+
+                spaceId:
+                  selectedPanelSpace.id,
+
+                roomNo:
+                  selectedPanelSpace.roomNo,
+
+                regionId:
+                  selectedRegion.id,
+
+                panelboard:
+                  selectedPanelSpace.panelboard,
+
+                circuitId:
+                  result.circuitId,
+
+                circuitNo:
+                  result.circuitNo,
+
+                loadDescription:
+                  result.loadDescription,
+
+                result:
+                  result.result,
+
+                notes:
+                  result.notes,
+
+                updatedBy:
+                  googleUser.email,
+              }),
+            ),
+          );
+
+      /*
+      * Do not create duplicate open
+      * issues for a circuit.
+      */
+      const existingOpenCircuitIds =
+        new Set(
+          panelIssues
+            .filter(
+              (issue) =>
+                issue.spaceId ===
+                  selectedPanelSpace.id &&
+                issue.status ===
+                  "open",
+            )
+            .map(
+              (issue) =>
+                issue.circuitId,
+            ),
+        );
+
+      const createdIssues:
+        SheetPanelIssue[] = [];
+
+      for (const result of results) {
+        const description =
+          issueDescriptions[
+            result.circuitId
+          ]?.trim();
+
+        if (
+          result.result !==
+            "issue" ||
+          !description ||
+          existingOpenCircuitIds.has(
+            result.circuitId,
+          )
+        ) {
+          continue;
+        }
+
+        const savedIssue =
+          await repository
+            .createPanelIssue({
+              floor,
+
+              spaceId:
+                selectedPanelSpace.id,
+
+              roomNo:
+                selectedPanelSpace.roomNo,
+
+              regionId:
+                selectedRegion.id,
+
+              panelboard:
+                selectedPanelSpace.panelboard,
+
+              circuitId:
+                result.circuitId,
+
+              circuitNo:
+                result.circuitNo,
+
+              issueDescription:
+                description,
+
+              createdBy:
+                googleUser.email,
+            });
+
+        createdIssues.push(
+          savedIssue,
+        );
+      }
+
+      const nextResults =
+        mergePanelTestResults(
+          panelTestResults,
+          savedResults,
+        );
+
+      setPanelTestResults(
+        nextResults,
+      );
+
+      setPanelIssues(
+        (current) => [
+          ...current,
+          ...createdIssues,
+        ],
+      );
+
+      setSyncStatus("synced");
+
+      setSyncMessage(
+        createdIssues.length > 0
+          ? `Panel testing saved and ${createdIssues.length} issue${
+              createdIssues.length === 1
+                ? ""
+                : "s"
+            } raised.`
+          : "Panel testing saved to Google Sheets.",
+      );
+    } catch (error) {
+      setSyncStatus("error");
+
+      setSyncMessage(
+        error instanceof Error
+          ? error.message
+          : "Panel testing could not be saved.",
+      );
+    }
+  }
+
   async function markIssueResolved(issue: SheetIssue): Promise<void> {
     if (
       !requirePermission(
@@ -1361,6 +1783,64 @@ export default function FloorPlan({
         error instanceof Error
           ? error.message
           : "The issue could not be resolved.",
+      );
+    }
+  }
+
+  async function markPanelIssueResolved(
+    issue: SheetPanelIssue,
+  ): Promise<void> {
+    if (
+      !requirePermission(
+        permissions.canResolveIssues,
+
+        "Your project role does not allow issue resolution.",
+      )
+    ) {
+      return;
+    }
+
+    if (!googleUser) {
+      return;
+    }
+
+    setSyncStatus("saving");
+
+    setSyncMessage(
+      "Resolving electrical panel issue…",
+    );
+
+    try {
+      const resolved =
+        await repository
+          .resolvePanelIssue(
+            issue.issueId,
+            googleUser.email,
+          );
+
+      setPanelIssues(
+        (current) =>
+          current.map(
+            (candidate) =>
+              candidate.issueId ===
+              resolved.issueId
+                ? resolved
+                : candidate,
+          ),
+      );
+
+      setSyncStatus("synced");
+
+      setSyncMessage(
+        "Panel issue marked as resolved.",
+      );
+    } catch (error) {
+      setSyncStatus("error");
+
+      setSyncMessage(
+        error instanceof Error
+          ? error.message
+          : "The panel issue could not be resolved.",
       );
     }
   }
@@ -1539,7 +2019,9 @@ export default function FloorPlan({
                       | "unassigned" =
                       mode === "panel-testing"
                         ? panelSpace
-                          ? "not_inspected"
+                          ? panelTestingStatusByRegionId.get(
+                              region.id,
+                            ) ?? "not_inspected"
                           : "unassigned"
                         : !assignedSpace
                           ? "unassigned"
@@ -1715,10 +2197,50 @@ export default function FloorPlan({
           selectedRegion &&
           selectedPanelSpace ? (
           <PanelTestingPanel
-            space={selectedPanelSpace}
-            region={selectedRegion}
+            space={
+              selectedPanelSpace
+            }
+
+            region={
+              selectedRegion
+            }
+
+            savedResults={
+              selectedPanelTestResults
+            }
+
+            issues={
+              selectedPanelIssues
+            }
+
+            googleConnected={
+              Boolean(googleUser)
+            }
+
+            saving={
+              syncStatus === "saving"
+            }
+
             readOnly={
-              !permissions.canPerformPanelTesting
+              !permissions
+                .canPerformPanelTesting
+            }
+
+            onSave={(
+              results,
+              descriptions,
+            ) =>
+              void savePanelTesting(
+                results,
+                descriptions,
+              )
+            }
+
+            onResolveIssue={
+              (issue) =>
+                void markPanelIssueResolved(
+                  issue,
+                )
             }
           />
         ) : mode === "panel-testing" &&
