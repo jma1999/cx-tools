@@ -1975,3 +1975,50 @@ button:disabled {
   color: #789584;
   font-size: 11px;
 }
+
+.panel-test-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.panel-test-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.panel-test-summary span {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.panel-test-summary strong {
+  color: #174f2b;
+  font-size: 12px;
+}
+
+.panel-reference-section {
+  margin: 16px 0;
+}
+
+.panel-reference-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  margin-top: 10px;
+  object-fit: contain;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #ffffff;
+}

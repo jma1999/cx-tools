@@ -5,6 +5,7 @@ export interface ProjectFloor {
   label: string;
   spacesUrl: string;
   regionsUrl: string;
+  panelTestsUrl?: string;
 }
 
 export interface ProjectConfig {

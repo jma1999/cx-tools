@@ -112,6 +112,11 @@ import {
         "regionsUrl",
         documentPath,
       ),
+
+      panelTestsUrl: optionalString(
+        data,
+        "panelTestsUrl",
+      ),
     };
   
     return {

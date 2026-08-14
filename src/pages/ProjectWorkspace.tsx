@@ -172,6 +172,7 @@ export default function ProjectWorkspace() {
         floor={selectedFloor.id}
         floorDataUrl={selectedFloor.spacesUrl}
         regionDataUrl={selectedFloor.regionsUrl}
+        panelTestsUrl={selectedFloor.panelTestsUrl}
         repository={repository}
         googleUser={googleUser}
         onConnectGoogle={() =>
