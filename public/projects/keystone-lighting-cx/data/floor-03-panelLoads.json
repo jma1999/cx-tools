@@ -2,6 +2,1259 @@
   "floor": "03",
   "spaces": [
     {
+      "id": "panel-sample-302b",
+      "floor": "03",
+      "roomNo": "302B",
+      "displayName": "302B - Mail Room",
+      "regionId": "region-012",
+      "panelboard": "Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/302b-MailRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "302b-circuit-q3a-2-4-6",
+          "circuitNo": "Q3A-2/4/6",
+          "loadDescription": "PIU-3A-6",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-314",
+      "floor": "03",
+      "roomNo": "314",
+      "displayName": "314 - Training Room",
+      "regionId": "region-005",
+      "panelboard": "R3A + Q3A",
+      "panelLocation": "Level-03",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "314-circuit-r3a-21",
+          "circuitNo": "R3A-21",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-22",
+          "circuitNo": "R3A-22",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-23",
+          "circuitNo": "R3A-23",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-24",
+          "circuitNo": "R3A-24",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-25",
+          "circuitNo": "R3A-25",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-26",
+          "circuitNo": "R3A-26",
+          "loadDescription": "Presentation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-r3a-107",
+          "circuitNo": "R3A-107",
+          "loadDescription": "Motorized Shades",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "314-circuit-q3a-8-10-12",
+          "circuitNo": "Q3A-8/10/12",
+          "loadDescription": "PIU-3A-7",
+          "testLabel": "Verify circuit isolation",
+          "instructions": "Verify the designated circuit loads respond to operation of the corresponding panelboard circuit.",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
       "id": "panel-sample-314",
       "floor": "03",
       "roomNo": "314",

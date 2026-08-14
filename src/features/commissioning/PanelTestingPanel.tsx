@@ -108,13 +108,6 @@ export default function PanelTestingPanel({
             circuit.id,
           );
 
-        const draft =
-          draftResults.find(
-            (result) =>
-              result.circuitId ===
-              circuit.id,
-          );
-
         return {
           circuitId: circuit.id,
           circuitNo: circuit.circuitNo,

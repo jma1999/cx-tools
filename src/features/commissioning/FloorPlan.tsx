@@ -29,6 +29,7 @@ import type {
   RegionData,
   SpaceStatus,
   TestDraftResult,
+  PanelTestDraftResult,
 } from "../../types/commissioning";
 import {
   useProject,
@@ -1045,6 +1046,13 @@ export default function FloorPlan({
       )
     : [];
 
+  const selectedPanelSpace =
+    selectedRegionId
+      ? panelSpacesByRegionId.get(
+          selectedRegionId,
+        )
+      : undefined;
+
   const selectedPanelTestResults =
     selectedPanelSpace
       ? panelTestResults.filter(
@@ -1062,13 +1070,6 @@ export default function FloorPlan({
             selectedPanelSpace.id,
         )
       : [];
-
-  const selectedPanelSpace =
-    selectedRegionId
-      ? panelSpacesByRegionId.get(
-          selectedRegionId,
-        )
-      : undefined;
 
   useEffect(() => {
     if (!googleUser || !selectedRegionId) {
