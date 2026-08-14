@@ -155,35 +155,6 @@ function getRegionExtentViewBox(
   ].join(" ");
 }
 
-const panelSpacesByRegionId =
-  useMemo(() => {
-    const entries =
-      panelTestData?.spaces
-        .filter(
-          (space) =>
-            Boolean(space.regionId),
-        )
-        .map(
-          (space) =>
-            [
-              space.regionId!,
-              space,
-            ] as const,
-        ) ?? [];
-
-    return new Map<
-      string,
-      PanelTestSpace
-    >(entries);
-  }, [panelTestData]);
-
-const selectedPanelSpace =
-  selectedRegionId
-    ? panelSpacesByRegionId.get(
-        selectedRegionId,
-      )
-    : undefined;
-
 function loadCachedAssignments(
   storageKey: string,
 ): Record<string, string | null> {
@@ -484,6 +455,7 @@ export default function FloorPlan({
 
   const [floorData, setFloorData] = useState<FloorData | null>(null);
   const [regionData, setRegionData] = useState<RegionData | null>(null);
+  const [panelTestData, setPanelTestData] = useState<PanelTestData | null>(null);
   const [checklistResults, setChecklistResults] = useState<
     SheetChecklistResult[]
   >([]);
@@ -494,11 +466,9 @@ export default function FloorPlan({
   const [mode, setMode] = useState<AppMode>("inspect");
   const [selectedRegionId, setSelectedRegionId] = useState("");
   const [pendingSpaceId, setPendingSpaceId] = useState("");
-  const [panelTestData, setPanelTestData] = useState<PanelTestData | null>(null);
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(
     null,
   );
-  const didPanRef = useRef(false);
   const [loadError, setLoadError] = useState("");
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("disconnected");
   const [syncMessage, setSyncMessage] = useState(
@@ -507,6 +477,8 @@ export default function FloorPlan({
   const [comments, setComments] = useState<SheetComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const didPanRef = useRef(false);
+
   const currentModeIsReadOnly =
     mode === "assign"
       ? !permissions.canAssignSpaces
@@ -515,6 +487,7 @@ export default function FloorPlan({
         : mode === "testing"
           ? !permissions.canPerformTesting
           : !permissions.canPerformPanelTesting;
+
   const activeStatusStyles =
     mode === "testing"
       ? TESTING_STATUS_STYLES
@@ -783,6 +756,24 @@ export default function FloorPlan({
     );
   }, [regionData]);
 
+  const panelSpacesByRegionId =
+    useMemo(() => {
+      const spaces =
+        panelTestData?.spaces ?? [];
+
+      return new Map(
+        spaces
+          .filter(
+            (space) =>
+              Boolean(space.regionId),
+          )
+          .map((space) => [
+            space.regionId!,
+            space,
+          ]),
+      );
+    }, [panelTestData]);
+
   const availableSpaces = useMemo(() => {
     if (!floorData) {
       return [];
@@ -842,6 +833,13 @@ export default function FloorPlan({
           result.spaceId === selectedAssignedSpace.id,
       )
     : [];
+
+  const selectedPanelSpace =
+    selectedRegionId
+      ? panelSpacesByRegionId.get(
+          selectedRegionId,
+        )
+      : undefined;
 
   useEffect(() => {
     if (!googleUser || !selectedRegionId) {
