@@ -3,7 +3,7 @@ import type { ProjectConfig } from "./projectTypes";
 export const PROJECTS: ProjectConfig[] = [
   {
     id: "keystone-lighting-cx",
-    name: "Keystone Lighting Commissioning",
+    name: "Keystone Lighting & Electrical Panels Commissioning",
     code: "Cx-LT",
     description: "Lighting commissioning for Floors 03 and 04.",
     spreadsheetId: import.meta.env.VITE_GOOGLE_SPREADSHEET_ID,

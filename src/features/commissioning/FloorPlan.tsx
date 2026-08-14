@@ -8,6 +8,7 @@ import InspectionPanel from "./InspectionPanel";
 import TestingPanel, {
   testIssueKey,
 } from "./TestingPanel";
+import PanelTestingPanel from "./PanelTestingPanel";
 import type {
   CommissioningRepository,
   SheetTestResult,
@@ -21,6 +22,8 @@ import type {
   CommissioningSpace,
   FloorData,
   FloorRegion,
+  PanelTestData,
+  PanelTestSpace,
   RegionData,
   SpaceStatus,
   TestDraftResult,
@@ -29,7 +32,7 @@ import {
   useProject,
 } from "../../projects/ProjectProvider";
 
-type AppMode = "assign" | "inspect" | "testing";
+type AppMode = "assign" | "inspect" | "testing" | "panel-testing";
 export type FloorId = "03" | "04";
 type SyncStatus =
   | "disconnected"
@@ -43,6 +46,7 @@ interface FloorPlanProps {
   floor: FloorId;
   floorDataUrl: string;
   regionDataUrl: string;
+  panelTestsUrl?: string;
   repository: CommissioningRepository;
   googleUser: GoogleUser | null;
   onConnectGoogle: () => void;
@@ -150,6 +154,35 @@ function getRegionExtentViewBox(
     height + paddingY * 2,
   ].join(" ");
 }
+
+const panelSpacesByRegionId =
+  useMemo(() => {
+    const entries =
+      panelTestData?.spaces
+        .filter(
+          (space) =>
+            Boolean(space.regionId),
+        )
+        .map(
+          (space) =>
+            [
+              space.regionId!,
+              space,
+            ] as const,
+        ) ?? [];
+
+    return new Map<
+      string,
+      PanelTestSpace
+    >(entries);
+  }, [panelTestData]);
+
+const selectedPanelSpace =
+  selectedRegionId
+    ? panelSpacesByRegionId.get(
+        selectedRegionId,
+      )
+    : undefined;
 
 function loadCachedAssignments(
   storageKey: string,
@@ -437,6 +470,7 @@ export default function FloorPlan({
   floor,
   floorDataUrl,
   regionDataUrl,
+  panelTestsUrl,
   repository,
   googleUser,
   onConnectGoogle,
@@ -460,6 +494,7 @@ export default function FloorPlan({
   const [mode, setMode] = useState<AppMode>("inspect");
   const [selectedRegionId, setSelectedRegionId] = useState("");
   const [pendingSpaceId, setPendingSpaceId] = useState("");
+  const [panelTestData, setPanelTestData] = useState<PanelTestData | null>(null);
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(
     null,
   );
@@ -477,7 +512,9 @@ export default function FloorPlan({
       ? !permissions.canAssignSpaces
       : mode === "inspect"
         ? !permissions.canCompleteChecklists
-        : !permissions.canPerformTesting;
+        : mode === "testing"
+          ? !permissions.canPerformTesting
+          : !permissions.canPerformPanelTesting;
   const activeStatusStyles =
     mode === "testing"
       ? TESTING_STATUS_STYLES
@@ -593,6 +630,62 @@ export default function FloorPlan({
 
     void loadData();
   }, [assignmentStorageKey, floor, floorDataUrl, regionDataUrl]);
+
+  useEffect(() => {
+    if (!panelTestsUrl) {
+      setPanelTestData(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadPanelTestData(): Promise<void> {
+      try {
+        const response =
+          await fetch(panelTestsUrl);
+
+        if (!response.ok) {
+          throw new Error(
+            `Floor ${floor} panel testing data could not be loaded.`,
+          );
+        }
+
+        const data =
+          (await response.json()) as PanelTestData;
+
+        if (data.floor !== floor) {
+          throw new Error(
+            `The panel testing JSON contains Floor ${data.floor}, but Floor ${floor} is currently open.`,
+          );
+        }
+
+        if (!cancelled) {
+          setPanelTestData(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setPanelTestData(null);
+
+          setSyncStatus("error");
+
+          setSyncMessage(
+            error instanceof Error
+              ? error.message
+              : "Panel testing data could not be loaded.",
+          );
+        }
+      }
+    }
+
+    void loadPanelTestData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    floor,
+    panelTestsUrl,
+  ]);
 
   useEffect(() => {
     if (!googleUser || !regionData || !floorData) {
@@ -1364,15 +1457,22 @@ export default function FloorPlan({
                     className={mode === "inspect" ? "active" : ""}
                     onClick={() => setMode("inspect")}
                   >
-                    Checklists
+                    LT-Fixture Checklists
                   </button>
                   <button
                     type="button"
                     className={mode === "testing" ? "active" : ""}
                     onClick={() => setMode("testing")}
                   >
-                    Testing
+                    LT-Controls Testing
                   </button>
+                  <button
+                    type="button"
+                    className={mode === "panel-testing" ? "active" : ""}
+                    onClick={() => setMode("panel-testing")}
+                  >
+                    ELE-Panels Testing
+                  </button>                  
                 </div>
 
                 <div className="toolbar-right">
@@ -1435,24 +1535,34 @@ export default function FloorPlan({
                     const assignedSpace = region.assignedSpaceId
                       ? spacesById.get(region.assignedSpaceId)
                       : undefined;
+                    const panelSpace = panelSpacesByRegionId.get(region.id);
                     const visualStatus:
                       | SpaceStatus
-                      | "unassigned" = !assignedSpace
-                      ? "unassigned"
-                      : mode === "testing"
-                        ? testingStatusBySpaceId.get(
-                            assignedSpace.id,
-                          ) ?? "not_inspected"
-                        : assignedSpace.status;
+                      | "unassigned" =
+                      mode === "panel-testing"
+                        ? panelSpace
+                          ? "not_inspected"
+                          : "unassigned"
+                        : !assignedSpace
+                          ? "unassigned"
+                          : mode === "testing"
+                            ? testingStatusBySpaceId.get(
+                                assignedSpace.id,
+                              ) ?? "not_inspected"
+                            : assignedSpace.status;
                     const style = activeStatusStyles[visualStatus];
                     const isSelected = selectedRegionId === region.id;
                     const isHovered = hoveredRegionId === region.id;
                     const [labelX, labelY] = region.centroid;
-                    const label = assignedSpace
-                      ? assignedSpace.roomNo === "N/A"
-                        ? region.label
-                        : assignedSpace.roomNo
-                      : region.label;
+                    const label =
+                      mode === "panel-testing"
+                        ? panelSpace?.roomNo ??
+                          region.label
+                        : assignedSpace
+                          ? assignedSpace.roomNo === "N/A"
+                            ? region.label
+                            : assignedSpace.roomNo
+                          : region.label;
 
                     return (
                       <g key={region.id}>
@@ -1603,6 +1713,32 @@ export default function FloorPlan({
               !permissions.canPerformTesting
             }
           />
+        ) : mode === "panel-testing" &&
+          selectedRegion &&
+          selectedPanelSpace ? (
+          <PanelTestingPanel
+            space={selectedPanelSpace}
+            region={selectedRegion}
+            readOnly={
+              !permissions.canPerformPanelTesting
+            }
+          />
+        ) : mode === "panel-testing" &&
+          selectedRegion ? (
+          <div className="empty-side-panel">
+            <p className="eyebrow">
+              ELE-panel testing
+            </p>
+
+            <h2>
+              No panel test sample assigned
+            </h2>
+
+            <p>
+              This room is not currently part of the
+              electrical panel testing sample.
+            </p>
+          </div>
         ) : (
           <div className="empty-side-panel">
             <p className="eyebrow">

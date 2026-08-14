@@ -7,6 +7,8 @@ export interface ProjectPermissions {
   canAssignSpaces: boolean;
   canCompleteChecklists: boolean;
   canPerformTesting: boolean;
+  canAssignPanelSamples: boolean;
+  canPerformPanelTesting: boolean;
   canAddComments: boolean;
   canCreateIssues: boolean;
   canResolveIssues: boolean;
@@ -23,6 +25,8 @@ const ROLE_PERMISSIONS: Record<
     canAssignSpaces: true,
     canCompleteChecklists: true,
     canPerformTesting: true,
+    canAssignPanelSamples: true,
+    canPerformPanelTesting: true,
     canAddComments: true,
     canCreateIssues: true,
     canResolveIssues: true,
@@ -35,6 +39,8 @@ const ROLE_PERMISSIONS: Record<
     canAssignSpaces: false,
     canCompleteChecklists: true,
     canPerformTesting: true,
+    canAssignPanelSamples: false,
+    canPerformPanelTesting: true,
     canAddComments: true,
     canCreateIssues: true,
     canResolveIssues: true,
@@ -47,6 +53,8 @@ const ROLE_PERMISSIONS: Record<
     canAssignSpaces: false,
     canCompleteChecklists: false,
     canPerformTesting: false,
+    canAssignPanelSamples: false,
+    canPerformPanelTesting: false,
     canAddComments: false,
     canCreateIssues: false,
     canResolveIssues: false,

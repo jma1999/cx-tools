@@ -99,3 +99,45 @@ export interface RegionData {
   };
   regions: FloorRegion[];
 }
+
+export interface PanelCircuitTestDefinition {
+  id: string;
+  circuitNo: string;
+  loadDescription: string;
+  testLabel: string;
+  instructions?: string;
+  expectedResult: string;
+  notes?: string;
+}
+
+export interface PanelTestSpace {
+  id: string;
+  floor: string;
+  roomNo: string;
+  displayName: string;
+  /*
+   * Temporary prepared mapping.
+   *
+   * Later the app will allow this mapping
+   * to be changed independently.
+   */
+  regionId?: string;
+  panelboard: string;
+  panelLocation?: string;
+  referenceImageUrl?: string;
+  notes?: string;
+  circuits: PanelCircuitTestDefinition[];
+}
+
+export interface PanelTestData {
+  floor: string;
+  spaces: PanelTestSpace[];
+}
+
+export interface PanelTestDraftResult {
+  circuitId: string;
+  circuitNo: string;
+  loadDescription: string;
+  result: ChecklistResult;
+  notes: string;
+}
