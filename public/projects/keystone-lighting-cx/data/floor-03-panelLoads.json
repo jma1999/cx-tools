@@ -956,7 +956,7 @@
       "panelboard": "R3B + Q3C",
       "panelLocation": "Level-03",
       "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/337-HuddleRoom.png",
-      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
           "id": "337-circuit-r3b-50",
