@@ -1,0 +1,969 @@
+{
+  "floor": "04",
+  "spaces": [
+    {
+      "id": "panel-sample-458",
+      "floor": "04",
+      "roomNo": "458",
+      "displayName": "458 - Multi-Space",
+      "regionId": "region-085",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/458-MultiSpace.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "458-circuit-r4a-55",
+          "circuitNo": "R4A-55",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "458-circuit-r4a-97-99",
+          "circuitNo": "R4A-97/99",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "458-circuit-r4a-101-103",
+          "circuitNo": "R4A-101/103",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-458a",
+      "floor": "04",
+      "roomNo": "458A",
+      "displayName": "458A - Co-Working",
+      "regionId": "region-087",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/458A-CoWorking.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "458a-circuit-r4a-57",
+          "circuitNo": "R4A-57",
+          "loadDescription": "Co-Working Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-476",
+      "floor": "04",
+      "roomNo": "476",
+      "displayName": "476 - Large Conference Room",
+      "regionId": "region-088",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/476-LgConfRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "476-circuit-r4a-27",
+          "circuitNo": "R4A-27",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "476-circuit-r4a-29",
+          "circuitNo": "R4A-29",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "476-circuit-r4a-28",
+          "circuitNo": "R4A-28",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-478",
+      "floor": "04",
+      "roomNo": "478",
+      "displayName": "478 - Pantry",
+      "regionId": "region-080",
+      "panelboard": "R4A + Q4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/478-Pantry.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "478-circuit-r4a-122-124-126",
+          "circuitNo": "R4A-122/124/126",
+          "loadDescription": "Coffee Brewer Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "478-circuit-r4a-37",
+          "circuitNo": "R4A-37",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "478-circuit-r4a-69-37",
+          "circuitNo": "R4A-37",
+          "loadDescription": "Microwave Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "478-circuit-r4a-38-39-40-41",
+          "circuitNo": "R4A-38/39/40/41",
+          "loadDescription": "Fridge Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "478-circuit-q4a-19-21-23",
+          "circuitNo": "Q4A-19/21/23",
+          "loadDescription": "PIU-4A-8",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-474",
+      "floor": "04",
+      "roomNo": "474",
+      "displayName": "474 - Huddle Room (A)",
+      "regionId": "region-076",
+      "panelboard": "R4A + Q4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/474-HuddleRoom.png",
+      "notes": "This room has a PIU circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "474-circuit-r4a-16",
+          "circuitNo": "R4A-16",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "474-circuit-r4a-17",
+          "circuitNo": "R4A-17",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "474-circuit-q4a-20-22-24",
+          "circuitNo": "Q4A-20/22/24",
+          "loadDescription": "PIU-4A-4",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-456",
+      "floor": "04",
+      "roomNo": "456",
+      "displayName": "456 - Collab Room (B)",
+      "regionId": "region-068",
+      "panelboard": "R4A + Q4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/456-CollabRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "456-circuit-r4a-8",
+          "circuitNo": "R4A-8",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "456-circuit-r4a-9",
+          "circuitNo": "R4A-9",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "456-circuit-q4a-25-27-29",
+          "circuitNo": "Q4A-25/27/29",
+          "loadDescription": "PIU-4A-2",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "456-circuit-r4a-7",
+          "circuitNo": "R4A-7",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-450",
+      "floor": "04",
+      "roomNo": "450",
+      "displayName": "450 - Focus",
+      "regionId": "region-034",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/450-Focus.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "450-circuit-r4a-3",
+          "circuitNo": "R4A-3",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-454",
+      "floor": "04",
+      "roomNo": "454",
+      "displayName": "454 - Multi-Space",
+      "regionId": "region-039",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/r39-MultiSpace.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "454-circuit-r4a-105-107",
+          "circuitNo": "R4A-105/107",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "454-circuit-r4a-96-98",
+          "circuitNo": "R4A-96/98",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "454-circuit-r4a-54",
+          "circuitNo": "R4A-54",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-c4-8",
+      "floor": "04",
+      "roomNo": "C4.8",
+      "displayName": "C4.8 - Corridor",
+      "regionId": "region-061",
+      "panelboard": "R4A + Q4A + EAP-IT-4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/r61-Corridor.png",
+      "notes": "This room has an HVAC circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "c4-8-circuit-r4a-56",
+          "circuitNo": "R4A-56",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "c4-8-circuit-q4a-7-9-11",
+          "circuitNo": "Q4A-7/9/11",
+          "loadDescription": "PIU-4A-6",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "c4-8-circuit-q4a-1-3-5",
+          "circuitNo": "Q4A-1/3/5",
+          "loadDescription": "PIU-4A-3",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "c4-8-circuit-eap-it-4a-13-15",
+          "circuitNo": "EAP-IT-4A-13/15",
+          "loadDescription": "AC-4A",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-412",
+      "floor": "04",
+      "roomNo": "412",
+      "displayName": "412 - Janitor",
+      "regionId": "region-053",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/412-Janitor.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "412-circuit-r4a-20",
+          "circuitNo": "R4A-20",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-410",
+      "floor": "04",
+      "roomNo": "410",
+      "displayName": "410 - Women's Restroom",
+      "regionId": "region-054",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/410-WomensRestroom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "410-circuit-r4a-20",
+          "circuitNo": "R4A-20",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-404",
+      "floor": "04",
+      "roomNo": "404",
+      "displayName": "404 - Service Point Area",
+      "regionId": "region-036",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/404-ServicePtArea.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "404-circuit-r4a-25",
+          "circuitNo": "R4A-25",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "404-circuit-r4a-26",
+          "circuitNo": "R4A-26",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-432",
+      "floor": "04",
+      "roomNo": "432",
+      "displayName": "432 - Collab Room (A)",
+      "regionId": "region-019",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/432-CollabRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "432-circuit-r4a-52",
+          "circuitNo": "R4A-52",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "432-circuit-r4a-73",
+          "circuitNo": "R4A-73",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "432-circuit-r4a-50",
+          "circuitNo": "R4A-50",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-424",
+      "floor": "04",
+      "roomNo": "424",
+      "displayName": "424 - Multi-Space",
+      "regionId": "region-003",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/424-MultiSpace.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "424-circuit-r4a-62-64",
+          "circuitNo": "R4A-62/64",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "424-circuit-r4a-58-60",
+          "circuitNo": "R4A-58/60",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "424-circuit-r4a-77",
+          "circuitNo": "R4A-77",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-424a",
+      "floor": "04",
+      "roomNo": "424A",
+      "displayName": "424A - Co-Working",
+      "regionId": "region-005",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/424a-CoWorking.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "424a-circuit-r4a-47",
+          "circuitNo": "R4A-47",
+          "loadDescription": "Co-Working Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-420",
+      "floor": "04",
+      "roomNo": "420",
+      "displayName": "420 - Collab Room (B)",
+      "regionId": "region-010",
+      "panelboard": "R4A",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/420-CollabRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "420-circuit-r4a-42",
+          "circuitNo": "R4A-42",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "420-circuit-r4a-44",
+          "circuitNo": "R4A-44",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "420-circuit-r4a-92",
+          "circuitNo": "R4A-92",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-487",
+      "floor": "04",
+      "roomNo": "487",
+      "displayName": "487 - Retreat",
+      "regionId": "region-083",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/487-Retreat.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "487-circuit-r4b-52",
+          "circuitNo": "R4B-52",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "487-circuit-r4b-54",
+          "circuitNo": "R4B-54",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "487-circuit-r4b-55",
+          "circuitNo": "R4B-55",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "487-circuit-r4b-62-64",
+          "circuitNo": "R4B-62/64",
+          "loadDescription": "Coffee Brewer Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "487-circuit-r4b-62-64",
+          "circuitNo": "R4B-62/64",
+          "loadDescription": "Coffee Brewer Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "487-circuit-r4b-72",
+          "circuitNo": "R4B-72",
+          "loadDescription": "UC Fridge Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-491a",
+      "floor": "04",
+      "roomNo": "491A",
+      "displayName": "491A - Co-Working",
+      "regionId": "region-086",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/491a-CoWorking.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "491a-circuit-r4b-58",
+          "circuitNo": "R4B-58",
+          "loadDescription": "Co-Working Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-491",
+      "floor": "04",
+      "roomNo": "491",
+      "displayName": "491 - Multi-Space",
+      "regionId": "region-084",
+      "panelboard": "R4B + Q4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/491-MultiSpace.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "491-circuit-r4b-56",
+          "circuitNo": "R4B-56",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "491-circuit-r4b-86-88",
+          "circuitNo": "R4B-86/88",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "491-circuit-r4b-90-91",
+          "circuitNo": "R4B-90/91",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "491-circuit-q4b-7-9-11",
+          "circuitNo": "Q4B-7/9/11",
+          "loadDescription": "PIU-4B-2",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-467",
+      "floor": "04",
+      "roomNo": "467",
+      "displayName": "467 - Conference",
+      "regionId": "region-081",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/467-Conference.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "467-circuit-r4b-35",
+          "circuitNo": "R4B-35",
+          "loadDescription": "Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "467-circuit-r4b-36",
+          "circuitNo": "R4B-36",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "467-circuit-r4b-37",
+          "circuitNo": "R4B-37",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "467-circuit-q4b-8-10-12",
+          "circuitNo": "Q4B-8/10/12",
+          "loadDescription": "PIU-4B-3",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-477",
+      "floor": "04",
+      "roomNo": "477",
+      "displayName": "477 - Collab Room (A)",
+      "regionId": "region-067",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/477-CollabRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "477-circuit-r4b-39",
+          "circuitNo": "R4B-39",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "477-circuit-r4b-40",
+          "circuitNo": "R4B-40",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "477-circuit-r4b-41",
+          "circuitNo": "R4B-41",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-457",
+      "floor": "04",
+      "roomNo": "457",
+      "displayName": "457 - Multi-Space",
+      "regionId": "region-026",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/457-MultiSpace.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "457-circuit-r4b-106",
+          "circuitNo": "R4B-106",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "457-circuit-r4b-93-95",
+          "circuitNo": "R4B-93/95",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-465",
+      "floor": "04",
+      "roomNo": "465",
+      "displayName": "465 - Copy/Print",
+      "regionId": "region-050",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/465-CopyPrint.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "465-circuit-r4b-24",
+          "circuitNo": "R4B-24",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "465-circuit-r4b-25",
+          "circuitNo": "R4B-25",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "465-circuit-r4b-26",
+          "circuitNo": "R4B-26",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "465-circuit-r4b-37",
+          "circuitNo": "R4B-37",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-417b",
+      "floor": "04",
+      "roomNo": "417B",
+      "displayName": "417B - Electrical",
+      "regionId": "region-052",
+      "panelboard": "EAP-IT-4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/417b-Elec.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "417b-circuit-eap-it-4b-13-15",
+          "circuitNo": "EAP-IT-4B-13/15",
+          "loadDescription": "AC-4B",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-413",
+      "floor": "04",
+      "roomNo": "413",
+      "displayName": "413 - Janitor",
+      "regionId": "region-033",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/413-Janitor.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "413-circuit-r4b-10",
+          "circuitNo": "R4B-10",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-409",
+      "floor": "04",
+      "roomNo": "409",
+      "displayName": "409 - Women's Restroom",
+      "regionId": "region-030",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/409-WomensRestroom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "409-circuit-r4b-10",
+          "circuitNo": "R4B-10",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-423",
+      "floor": "04",
+      "roomNo": "423",
+      "displayName": "423 - Huddle Room (B)",
+      "regionId": "region-090",
+      "panelboard": "R4B + Q4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/423-HuddleRoom.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "423-circuit-r4b-15",
+          "circuitNo": "R4B-15",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "423-circuit-r4b-16",
+          "circuitNo": "R4B-16",
+          "loadDescription": "TV Receptacle",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "423-circuit-q4b-31-33-35",
+          "circuitNo": "Q4B-31/33/35",
+          "loadDescription": "PIU-4B-6",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-402",
+      "floor": "04",
+      "roomNo": "402",
+      "displayName": "402 - Library",
+      "regionId": "region-006",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/402-Library.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "402-circuit-r4b-3",
+          "circuitNo": "R4B-3",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "402-circuit-r4b-2",
+          "circuitNo": "R4B-2",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "402-circuit-r4b-4",
+          "circuitNo": "R4B-4",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "402-circuit-r4b-1",
+          "circuitNo": "R4B-1",
+          "loadDescription": "Floor Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "402-circuit-r4b-5",
+          "circuitNo": "R4B-5",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "402-circuit-r4b-82",
+          "circuitNo": "R4B-82",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-439a",
+      "floor": "04",
+      "roomNo": "439A",
+      "displayName": "439A - Meeting Room",
+      "regionId": "region-004",
+      "panelboard": "R4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/439a-CoWorking.png",
+      "notes": "",
+      "circuits": [
+        {
+          "id": "439a-circuit-r4b-13",
+          "circuitNo": "R4B-13",
+          "loadDescription": "Co-Working Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "panel-sample-439",
+      "floor": "04",
+      "roomNo": "439",
+      "displayName": "439 - Multi-Space",
+      "regionId": "region-002",
+      "panelboard": "R4B + Q4B",
+      "panelLocation": "Level-04",
+      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/439-MultiSpace.png",
+      "notes": "This room has an HVAC circuit to be tested with controls professional.",
+      "circuits": [
+        {
+          "id": "439-circuit-r4b-108",
+          "circuitNo": "R4B-108",
+          "loadDescription": "Wall Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "439-circuit-r4b-101-103",
+          "circuitNo": "R4B-101/103",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "439-circuit-r4b-97-98",
+          "circuitNo": "R4B-97/98",
+          "loadDescription": "Workstation Receptacles",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        },
+        {
+          "id": "439-circuit-q4b-1-3-5",
+          "circuitNo": "Q4B-1/3/5",
+          "loadDescription": "PIU-4B-5",
+          "testLabel": "Verify circuit isolation",
+          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
+        }
+      ]
+    }
+  ]
+}
