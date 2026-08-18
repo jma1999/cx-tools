@@ -180,7 +180,7 @@
       "panelboard": "R4A + Q4A",
       "panelLocation": "Level-04",
       "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/456-CollabRoom.png",
-      "notes": "",
+      "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
           "id": "456-circuit-r4a-8",
