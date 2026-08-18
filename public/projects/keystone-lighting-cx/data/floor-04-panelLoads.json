@@ -115,8 +115,8 @@
           "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
         },
         {
-          "id": "478-circuit-r4a-69-37",
-          "circuitNo": "R4A-37",
+          "id": "478-circuit-r4a-33-34-35-36",
+          "circuitNo": "R4A-33/34/35/36",
           "loadDescription": "Microwave Receptacles",
           "testLabel": "Verify circuit isolation",
           "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
@@ -525,13 +525,6 @@
           "id": "487-circuit-r4b-55",
           "circuitNo": "R4B-55",
           "loadDescription": "Floor Receptacles",
-          "testLabel": "Verify circuit isolation",
-          "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
-        },
-        {
-          "id": "487-circuit-r4b-62-64",
-          "circuitNo": "R4B-62/64",
-          "loadDescription": "Coffee Brewer Receptacles",
           "testLabel": "Verify circuit isolation",
           "expectedResult": "All identified circuit loads are off when the corresponding circuit is isolated, while unrelated circuits remain unaffected."
         },
