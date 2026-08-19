@@ -749,7 +749,7 @@ export default function FloorPlan({
     }
 
     void loadData();
-  }, [assignmentStorageKey, floor, floorDataUrl, regionDataUrl]);
+  }, [floor, floorDataUrl, regionDataUrl]);
 
   useEffect(() => {
     if (!panelTestsUrl) {
