@@ -370,18 +370,6 @@ export default function PanelTestingPanel({
                     </p>
                   </div>
 
-                  {circuit.instructions && (
-                    <div className="panel-test-instructions">
-                      <span>
-                        TEST INSTRUCTIONS
-                      </span>
-
-                      <p>
-                        {circuit.instructions}
-                      </p>
-                    </div>
-                  )}
-
                   <div className="fixture-reference-note">
                     <span>
                       Expected result

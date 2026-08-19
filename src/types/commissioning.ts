@@ -105,7 +105,6 @@ export interface PanelCircuitTestDefinition {
   circuitNo: string;
   loadDescription: string;
   testLabel: string;
-  instructions?: string;
   expectedResult: string;
   notes?: string;
 }

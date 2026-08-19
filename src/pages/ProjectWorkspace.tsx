@@ -167,7 +167,6 @@ export default function ProjectWorkspace() {
       </nav>
 
       <FloorPlan
-        key={`${project.id}-${selectedFloor.id}-${googleUser?.email ?? "local"}`}
         projectId={project.id}
         floor={selectedFloor.id}
         floorDataUrl={selectedFloor.spacesUrl}
