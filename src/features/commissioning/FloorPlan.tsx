@@ -34,6 +34,10 @@ import type {
 import {
   useProject,
 } from "../../projects/ProjectProvider";
+import {
+  loadImageAsset,
+  loadJsonAsset,
+} from "../../services/projectAssets";
 
 type AppMode = "assign" | "inspect" | "testing" | "panel-testing";
 export type FloorId = "03" | "04";
@@ -647,6 +651,11 @@ export default function FloorPlan({
   const [comments, setComments] = useState<SheetComment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [
+    planImageUrl,
+    setPlanImageUrl,
+  ] = useState("");
+
   const didPanRef = useRef(false);
 
   const currentModeIsReadOnly =
@@ -688,17 +697,18 @@ export default function FloorPlan({
       setPanelIssues([]);
 
       try {
-        const [floorResponse, regionResponse] = await Promise.all([
-          fetch(floorDataUrl),
-          fetch(regionDataUrl),
+        const [
+          loadedFloorData,
+          loadedRegionData,
+        ] = await Promise.all([
+          loadJsonAsset<FloorData>(
+            floorDataUrl,
+          ),
+
+          loadJsonAsset<RegionData>(
+            regionDataUrl,
+          ),
         ]);
-
-        if (!floorResponse.ok || !regionResponse.ok) {
-          throw new Error(`The Floor ${floor} plan data could not be loaded.`);
-        }
-
-        const loadedFloorData = (await floorResponse.json()) as FloorData;
-        const loadedRegionData = (await regionResponse.json()) as RegionData;
 
         if (
           loadedFloorData.floor !== floor ||
@@ -786,17 +796,10 @@ export default function FloorPlan({
 
     async function loadPanelTestData(): Promise<void> {
       try {
-        const response =
-          await fetch(panelTestsUrl);
-
-        if (!response.ok) {
-          throw new Error(
-            `Floor ${floor} panel testing data could not be loaded.`,
-          );
-        }
-
         const data =
-          (await response.json()) as PanelTestData;
+          await loadJsonAsset<PanelTestData>(
+            panelTestsUrl,
+          );
 
         if (data.floor !== floor) {
           throw new Error(
@@ -1109,6 +1112,65 @@ export default function FloorPlan({
       cancelled = true;
     };
   }, [floor, googleUser, selectedRegionId, repository]);
+
+  useEffect(() => {
+    if (!regionData?.sourcePlan) {
+      setPlanImageUrl("");
+      return;
+    }
+
+    let cancelled = false;
+    let objectUrl = "";
+
+    async function loadPlan(): Promise<void> {
+      try {
+        const asset =
+          await loadImageAsset(
+            regionData!.sourcePlan,
+          );
+
+        if (cancelled) {
+          if (asset.revoke) {
+            URL.revokeObjectURL(
+              asset.url,
+            );
+          }
+
+          return;
+        }
+
+        objectUrl = asset.revoke
+          ? asset.url
+          : "";
+
+        setPlanImageUrl(
+          asset.url,
+        );
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : "The floor plan image could not be loaded.",
+          );
+        }
+      }
+    }
+
+    void loadPlan();
+
+    return () => {
+      cancelled = true;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(
+          objectUrl,
+        );
+      }
+    };
+  }, [
+    regionData?.sourcePlan,
+  ]);
 
   function requirePermission(
     allowed: boolean,
@@ -2001,7 +2063,7 @@ export default function FloorPlan({
                   aria-label={`Floor ${floor} selectable lighting commissioning plan`}
                 >
                   <image
-                    href={regionData.sourcePlan}
+                    href={planImageUrl}
                     x="0"
                     y="0"
                     width={planWidth}

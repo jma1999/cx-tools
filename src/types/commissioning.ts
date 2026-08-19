@@ -123,7 +123,7 @@ export interface PanelTestSpace {
   regionId?: string;
   panelboard: string;
   panelLocation?: string;
-  referenceImageUrl?: string;
+  referenceImagePath?: string;
   notes?: string;
   circuits: PanelCircuitTestDefinition[];
 }
