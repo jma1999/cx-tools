@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "floor": "03",
   "plan": {
-    "file": "/projects/keystone-lighting-cx/floors/floor-03-base.svg",
+    "file": "projects/keystone-cx/floors/03/plans/floor-03-base.svg",
     "viewBox": "0 0 792 612"
   },
   "spaces": [

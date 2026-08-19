@@ -9,7 +9,7 @@
       "regionId": "region-012",
       "panelboard": "Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/302b-MailRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/302b-MailRoom.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -29,7 +29,7 @@
       "regionId": "region-005",
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/314-TrainingRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/314-TrainingRoom.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -98,7 +98,7 @@
       "regionId": "region-018",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/316-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/316-CollabRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -132,7 +132,7 @@
       "regionId": "region-003",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/320-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/320-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -166,7 +166,7 @@
       "regionId": "region-014",
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/326-Focus.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/326-Focus.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -193,7 +193,7 @@
       "regionId": "region-021",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/328a-ControlRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/328a-ControlRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -227,7 +227,7 @@
       "regionId": "region-022",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/328-BroadcastStudio.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/328-BroadcastStudio.png",
       "notes": "",
       "circuits": [
         {
@@ -261,7 +261,7 @@
       "regionId": "region-064",
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/342-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/342-CollabRoom.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -302,7 +302,7 @@
       "regionId": "region-057",
       "panelboard": "R3A + Q3A + EAP-IT-3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/c3-7-Corridor.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/c3-7-Corridor.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -350,7 +350,7 @@
       "regionId": "region-032",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/334-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/334-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -384,7 +384,7 @@
       "regionId": "region-083",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/360a-CoWorking.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/360a-CoWorking.png",
       "notes": "",
       "circuits": [
         {
@@ -404,7 +404,7 @@
       "regionId": "region-072",
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/358-HuddleRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/358-HuddleRoom.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -438,7 +438,7 @@
       "regionId": "region-084",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/362-LgConfRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/362-LgConfRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -479,7 +479,7 @@
       "regionId": "region-074",
       "panelboard": "R3A + Q3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/364-Pantry.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/364-Pantry.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -527,7 +527,7 @@
       "regionId": "region-047",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/340-Janitor.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/340-Janitor.png",
       "notes": "",
       "circuits": [
         {
@@ -547,7 +547,7 @@
       "regionId": "region-050",
       "panelboard": "R3A",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/312-WomensRestroom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/312-WomensRestroom.png",
       "notes": "",
       "circuits": [
         {
@@ -567,7 +567,7 @@
       "regionId": "region-080",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/349-Cafe.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/349-Cafe.png",
       "notes": "",
       "circuits": [
         {
@@ -615,7 +615,7 @@
       "regionId": "region-087",
       "panelboard": "R3B + Q3C",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/349e-WareWashing.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/349e-WareWashing.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -642,7 +642,7 @@
       "regionId": "region-040",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/300-ElevatorLobby.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/300-ElevatorLobby.png",
       "notes": "",
       "circuits": [
         {
@@ -662,7 +662,7 @@
       "regionId": "region-004",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/305-MFBreakout.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/305-MFBreakout.png",
       "notes": "",
       "circuits": [
         {
@@ -696,7 +696,7 @@
       "regionId": "region-007",
       "panelboard": "R3B + Q3C",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/313-MFSuite.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/313-MFSuite.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -744,7 +744,7 @@
       "regionId": "region-020",
       "panelboard": "R3B + Q3C",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/c3-1-Corridor.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/c3-1-Corridor.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -785,7 +785,7 @@
       "regionId": "region-028",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/307-WomensRestroom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/307-WomensRestroom.png",
       "notes": "",
       "circuits": [
         {
@@ -805,7 +805,7 @@
       "regionId": "region-030",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/317-Janitor.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/317-Janitor.png",
       "notes": "",
       "circuits": [
         {
@@ -825,7 +825,7 @@
       "regionId": "region-013",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/323-MFBreakout.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/323-MFBreakout.png",
       "notes": "",
       "circuits": [
         {
@@ -887,7 +887,7 @@
       "regionId": "region-062",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/333-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/333-CollabRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -921,7 +921,7 @@
       "regionId": "region-081",
       "panelboard": "R3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/335-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/335-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -955,7 +955,7 @@
       "regionId": "region-078",
       "panelboard": "R3B + Q3C",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/337-HuddleRoom.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/337-HuddleRoom.png",
       "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -989,7 +989,7 @@
       "regionId": "region-046",
       "panelboard": "EAP-IT-3B",
       "panelLocation": "Level-03",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-03/321b-Elec.png",
+      "referenceImageUrl": "projects/keystone-cx/floors/03/panel-reference/321b-Elec.png",
       "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
