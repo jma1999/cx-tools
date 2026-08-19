@@ -105,7 +105,6 @@ export interface PanelCircuitTestDefinition {
   circuitNo: string;
   loadDescription: string;
   testLabel: string;
-  instructions?: string;
   expectedResult: string;
   notes?: string;
 }
@@ -124,7 +123,7 @@ export interface PanelTestSpace {
   regionId?: string;
   panelboard: string;
   panelLocation?: string;
-  referenceImageUrl?: string;
+  referenceImagePath?: string;
   notes?: string;
   circuits: PanelCircuitTestDefinition[];
 }

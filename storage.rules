@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasMembership(projectId) {
+      return signedIn()
+        && firestore.exists(
+          /databases/(default)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        )
+        && firestore.get(
+          /databases/(default)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        ).data.active == true;
+    }
+
+    function isProjectAdmin(projectId) {
+      return hasMembership(projectId)
+        && firestore.get(
+          /databases/(default)/documents/users/$(request.auth.uid)/memberships/$(projectId)
+        ).data.role == "admin";
+    }
+
+    match /projects/{projectId}/floors/{floorId}/data/{fileName} {
+      allow read:
+        if hasMembership(projectId);
+
+      allow create, update:
+        if isProjectAdmin(projectId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType == "application/json";
+
+      allow delete:
+        if isProjectAdmin(projectId);
+    }
+
+    match /projects/{projectId}/floors/{floorId}/plans/{fileName} {
+      allow read:
+        if hasMembership(projectId);
+
+      allow create, update:
+        if isProjectAdmin(projectId)
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+
+      allow delete:
+        if isProjectAdmin(projectId);
+    }
+
+    match /projects/{projectId}/floors/{floorId}/panel-reference/{fileName} {
+      allow read:
+        if hasMembership(projectId);
+
+      allow create, update:
+        if isProjectAdmin(projectId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+
+      allow delete:
+        if isProjectAdmin(projectId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -2022,27 +2022,3 @@ button:disabled {
   border-radius: 12px;
   background: #ffffff;
 }
-
-.panel-test-instruction {
-  margin: 8px 0 14px;
-}
-
-.panel-test-instruction span {
-  display: block;
-  margin-bottom: 6px;
-
-  color: #64748b;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.panel-test-instruction p {
-  margin: 0;
-
-  color: #173c2a;
-  font-size: 8px;
-  font-weight: 400;
-  line-height: 1.45;
-}

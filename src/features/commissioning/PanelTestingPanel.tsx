@@ -16,6 +16,10 @@ import type {
   SheetPanelTestResult,
 } from "../../services/googleSheets";
 
+import {
+  loadImageAsset,
+} from "../../services/projectAssets"
+
 interface PanelTestingPanelProps {
   space: PanelTestSpace;
   region: FloorRegion;
@@ -93,6 +97,11 @@ export default function PanelTestingPanel({
     setValidationMessage,
   ] = useState("");
 
+  const [
+    referenceImageUrl,
+    setReferenceImageUrl,
+  ] = useState("");
+
   useEffect(() => {
     const savedByCircuitId = new Map(
       savedResults.map((result) => [
@@ -130,6 +139,65 @@ export default function PanelTestingPanel({
     space.id,
     space.circuits,
     savedResults,
+  ]);
+
+  useEffect(() => {
+    if (
+      !space.referenceImagePath
+    ) {
+      setReferenceImageUrl("");
+      return;
+    }
+
+    let cancelled = false;
+    let objectUrl = "";
+
+    async function loadReferenceImage():
+      Promise<void> {
+      try {
+        const asset =
+          await loadImageAsset(
+            space.referenceImagePath!,
+          );
+
+        if (cancelled) {
+          if (asset.revoke) {
+            URL.revokeObjectURL(
+              asset.url,
+            );
+          }
+
+          return;
+        }
+
+        objectUrl =
+          asset.revoke
+            ? asset.url
+            : "";
+
+        setReferenceImageUrl(
+          asset.url,
+        );
+      } catch {
+        if (!cancelled) {
+          setReferenceImageUrl("");
+        }
+      }
+    }
+
+    void loadReferenceImage();
+
+    return () => {
+      cancelled = true;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(
+          objectUrl,
+        );
+      }
+    };
+  }, [
+    space.referenceImagePath,
   ]);
 
   const openIssuesByCircuit =
@@ -302,7 +370,7 @@ export default function PanelTestingPanel({
         </div>
       )}
 
-      {space.referenceImageUrl && (
+      {referenceImageUrl && (
         <section className="panel-reference-section">
           <div className="inspection-group-heading">
             <h3>
@@ -312,7 +380,7 @@ export default function PanelTestingPanel({
 
           <img
             className="panel-reference-image"
-            src={space.referenceImageUrl}
+            src={referenceImageUrl}
             alt={`Electrical plan reference for ${space.displayName}`}
           />
         </section>
@@ -369,18 +437,6 @@ export default function PanelTestingPanel({
                       {circuit.testLabel}
                     </p>
                   </div>
-
-                  {circuit.instructions && (
-                    <div className="panel-test-instructions">
-                      <span>
-                        TEST INSTRUCTIONS
-                      </span>
-
-                      <p>
-                        {circuit.instructions}
-                      </p>
-                    </div>
-                  )}
 
                   <div className="fixture-reference-note">
                     <span>
