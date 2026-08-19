@@ -162,34 +162,6 @@ function getRegionExtentViewBox(
   ].join(" ");
 }
 
-function loadCachedAssignments(
-  storageKey: string,
-): Record<string, string | null> {
-  const savedValue = localStorage.getItem(storageKey);
-
-  if (!savedValue) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(savedValue) as Record<string, string | null>;
-  } catch {
-    localStorage.removeItem(storageKey);
-    return {};
-  }
-}
-
-function cacheAssignments(
-  storageKey: string,
-  regions: FloorRegion[],
-): void {
-  const assignments = Object.fromEntries(
-    regions.map((region) => [region.id, region.assignedSpaceId]),
-  );
-
-  localStorage.setItem(storageKey, JSON.stringify(assignments));
-}
-
 function formatTimestamp(value: string): string {
   const date = new Date(value);
 
@@ -608,8 +580,6 @@ export default function FloorPlan({
   googleUser,
   onConnectGoogle,
 }: FloorPlanProps) {
-  const assignmentStorageKey =
-    `lighting-cx-${projectId}-floor-${floor}-region-assignments-v9-cache`;
 
   const {
     permissions,
@@ -751,28 +721,23 @@ export default function FloorPlan({
           jsonAssignmentsByRegion.set(regionId, space.id);
         }
 
-        const cachedAssignments = loadCachedAssignments(
-          assignmentStorageKey,
-        );
-
         setFloorData(loadedFloorData);
+
         setRegionData({
           ...loadedRegionData,
-          regions: loadedRegionData.regions.map((region) => {
-            const hasCachedAssignment =
-              Object.prototype.hasOwnProperty.call(
-                cachedAssignments,
-                region.id,
-              );
 
-            return {
-              ...region,
-              assignedSpaceId: hasCachedAssignment
-                ? cachedAssignments[region.id]
-                : jsonAssignmentsByRegion.get(region.id) ??
+          regions:
+            loadedRegionData.regions.map(
+              (region) => ({
+                ...region,
+
+                assignedSpaceId:
+                  jsonAssignmentsByRegion.get(
+                    region.id,
+                  ) ??
                   region.assignedSpaceId,
-            };
-          }),
+              }),
+            ),
         });
       } catch (error) {
         setLoadError(
@@ -881,7 +846,6 @@ export default function FloorPlan({
         }));
 
         setRegionData({ ...regionData, regions: nextRegions });
-        cacheAssignments(assignmentStorageKey, nextRegions);
         setChecklistResults(cloudResults);
         setTestResults(cloudTestResults);
         setSheetIssues(cloudIssues);
@@ -1239,7 +1203,6 @@ export default function FloorPlan({
       );
 
       setRegionData({ ...regionData, regions: nextRegions });
-      cacheAssignments(assignmentStorageKey, nextRegions);
       setSyncStatus("synced");
       setSyncMessage("Assignment saved to Google Sheets.");
     } catch (error) {
@@ -1287,7 +1250,6 @@ export default function FloorPlan({
 
       setRegionData({ ...regionData, regions: nextRegions });
       setPendingSpaceId("");
-      cacheAssignments(assignmentStorageKey, nextRegions);
       setSyncStatus("synced");
       setSyncMessage("Assignment cleared in Google Sheets.");
     } catch (error) {
@@ -1335,7 +1297,6 @@ export default function FloorPlan({
       }));
 
       setRegionData({ ...regionData, regions: nextRegions });
-      cacheAssignments(assignmentStorageKey, nextRegions);
       setChecklistResults(cloudResults);
       setTestResults(cloudTestResults);
       setSheetIssues(cloudIssues);

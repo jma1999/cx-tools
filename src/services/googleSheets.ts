@@ -586,24 +586,54 @@ function checklistResultValue(value: unknown): ChecklistResult {
 export async function loadAssignments(
   floor: string,
   spreadsheetId?: string,
-): Promise<Record<string, string | null>> {
-  const response = await getValues(
-    "RegionAssignments!A2:I",
-    spreadsheetId,
-  );
-  const assignments: Record<string, string | null> = {};
+): Promise<
+  Record<string, string | null>
+> {
+  const response =
+    await getValues(
+      "RegionAssignments!A2:I",
+      spreadsheetId,
+    );
 
-  for (const row of response.values ?? []) {
-    if (stringValue(row[0]) !== floor) {
+  const assignments:
+    Record<string, string | null> = {};
+
+  for (
+    const row of
+    response.values ?? []
+  ) {
+    if (
+      stringValue(row[0]) !== floor
+    ) {
       continue;
     }
 
-    const regionId = stringValue(row[1]);
+    const regionId =
+      stringValue(row[1]);
+
     if (!regionId) {
       continue;
     }
 
-    assignments[regionId] = stringValue(row[3]) || null;
+    const storedSpaceId =
+      stringValue(row[3]);
+
+    /*
+     * Old blank rows should NOT wipe out
+     * assignments prepared in the JSON.
+     */
+    if (!storedSpaceId) {
+      continue;
+    }
+
+    /*
+     * Explicit user-requested clear.
+     */
+    assignments[regionId] =
+      storedSpaceId ===
+      "__CLEARED__"
+        ? null
+        : storedSpaceId;
   }
 
   return assignments;
@@ -637,7 +667,7 @@ export async function upsertAssignment(
     savedAssignment.floor,
     savedAssignment.regionId,
     savedAssignment.regionLabel,
-    savedAssignment.spaceId ?? "",
+    savedAssignment.spaceId ?? "__CLEARED__",
     savedAssignment.roomNo,
     savedAssignment.spaceType,
     savedAssignment.updatedBy,

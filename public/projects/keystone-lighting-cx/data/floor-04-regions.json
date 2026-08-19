@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "floor": "04",
   "viewBox": "0 0 792 612",
-  "sourcePlan": "/projects/keystone-lighting-cx/floors/floor-04-base.svg",
+  "sourcePlan": "projects/keystone-lighting-cx/floors/04/plans/floor-04-base.svg",
   "generation": {
     "method": "polygonize closed vector linework",
     "regionCount": 88,

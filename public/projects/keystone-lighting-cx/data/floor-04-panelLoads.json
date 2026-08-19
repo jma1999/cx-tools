@@ -9,7 +9,7 @@
       "regionId": "region-085",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/458-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/458-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -43,7 +43,7 @@
       "regionId": "region-087",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/458A-CoWorking.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/458A-CoWorking.png",
       "notes": "",
       "circuits": [
         {
@@ -63,7 +63,7 @@
       "regionId": "region-088",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/476-LgConfRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/476-LgConfRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -97,7 +97,7 @@
       "regionId": "region-080",
       "panelboard": "R4A + Q4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/478-Pantry.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/478-Pantry.png",
       "notes": "",
       "circuits": [
         {
@@ -145,7 +145,7 @@
       "regionId": "region-076",
       "panelboard": "R4A + Q4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/474-HuddleRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/474-HuddleRoom.png",
       "notes": "This room has a PIU circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -179,7 +179,7 @@
       "regionId": "region-068",
       "panelboard": "R4A + Q4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/456-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/456-CollabRoom.png",
       "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -220,7 +220,7 @@
       "regionId": "region-034",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/450-Focus.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/450-Focus.png",
       "notes": "",
       "circuits": [
         {
@@ -240,7 +240,7 @@
       "regionId": "region-039",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/r39-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/r39-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -274,7 +274,7 @@
       "regionId": "region-061",
       "panelboard": "R4A + Q4A + EAP-IT-4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/r61-Corridor.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/r61-Corridor.png",
       "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
@@ -315,7 +315,7 @@
       "regionId": "region-053",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/412-Janitor.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/412-Janitor.png",
       "notes": "",
       "circuits": [
         {
@@ -335,7 +335,7 @@
       "regionId": "region-054",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/410-WomensRestroom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/410-WomensRestroom.png",
       "notes": "",
       "circuits": [
         {
@@ -355,7 +355,7 @@
       "regionId": "region-036",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/404-ServicePtArea.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/404-ServicePtArea.png",
       "notes": "",
       "circuits": [
         {
@@ -382,7 +382,7 @@
       "regionId": "region-019",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/432-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/432-CollabRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -416,7 +416,7 @@
       "regionId": "region-003",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/424-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/424-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -450,7 +450,7 @@
       "regionId": "region-005",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/424a-CoWorking.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/424a-CoWorking.png",
       "notes": "",
       "circuits": [
         {
@@ -470,7 +470,7 @@
       "regionId": "region-010",
       "panelboard": "R4A",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/420-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/420-CollabRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -504,7 +504,7 @@
       "regionId": "region-083",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/487-Retreat.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/487-Retreat.png",
       "notes": "",
       "circuits": [
         {
@@ -552,7 +552,7 @@
       "regionId": "region-086",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/491a-CoWorking.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/491a-CoWorking.png",
       "notes": "",
       "circuits": [
         {
@@ -572,7 +572,7 @@
       "regionId": "region-084",
       "panelboard": "R4B + Q4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/491-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/491-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -613,7 +613,7 @@
       "regionId": "region-081",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/467-Conference.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/467-Conference.png",
       "notes": "",
       "circuits": [
         {
@@ -654,7 +654,7 @@
       "regionId": "region-067",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/477-CollabRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/477-CollabRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -688,7 +688,7 @@
       "regionId": "region-026",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/457-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/457-MultiSpace.png",
       "notes": "",
       "circuits": [
         {
@@ -715,7 +715,7 @@
       "regionId": "region-050",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/465-CopyPrint.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/465-CopyPrint.png",
       "notes": "",
       "circuits": [
         {
@@ -756,7 +756,7 @@
       "regionId": "region-052",
       "panelboard": "EAP-IT-4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/417b-Elec.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/417b-Elec.png",
       "notes": "",
       "circuits": [
         {
@@ -776,7 +776,7 @@
       "regionId": "region-033",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/413-Janitor.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/413-Janitor.png",
       "notes": "",
       "circuits": [
         {
@@ -796,7 +796,7 @@
       "regionId": "region-030",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/409-WomensRestroom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/409-WomensRestroom.png",
       "notes": "",
       "circuits": [
         {
@@ -816,7 +816,7 @@
       "regionId": "region-090",
       "panelboard": "R4B + Q4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/423-HuddleRoom.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/423-HuddleRoom.png",
       "notes": "",
       "circuits": [
         {
@@ -850,7 +850,7 @@
       "regionId": "region-006",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/402-Library.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/402-Library.png",
       "notes": "",
       "circuits": [
         {
@@ -905,7 +905,7 @@
       "regionId": "region-004",
       "panelboard": "R4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/439a-CoWorking.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/439a-CoWorking.png",
       "notes": "",
       "circuits": [
         {
@@ -925,7 +925,7 @@
       "regionId": "region-002",
       "panelboard": "R4B + Q4B",
       "panelLocation": "Level-04",
-      "referenceImageUrl": "/projects/keystone-lighting-cx/panel-reference/floor-04/439-MultiSpace.png",
+      "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/439-MultiSpace.png",
       "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
