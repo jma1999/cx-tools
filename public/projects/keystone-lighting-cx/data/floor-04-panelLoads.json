@@ -573,7 +573,7 @@
       "panelboard": "R4B + Q4B",
       "panelLocation": "Level-04",
       "referenceImageUrl": "projects/keystone-lighting-cx/floors/04/panel-reference/491-MultiSpace.png",
-      "notes": "",
+      "notes": "This room has an HVAC circuit to be tested with controls professional.",
       "circuits": [
         {
           "id": "491-circuit-r4b-56",
