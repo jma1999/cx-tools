@@ -41,6 +41,11 @@ type ProjectRole =
   | "editor"
   | "viewer";
 
+type ProjectStatus =
+  | "draft"
+  | "active"
+  | "archived";
+
 const VALID_ROLES =
   new Set<ProjectRole>([
     "admin",
@@ -195,6 +200,31 @@ async function requireProjectAdmin(
 }
 
 /**
+ * Requires the user to have the system administrator role.
+ *
+ * @param {string} uid Firebase Auth user ID.
+ */
+async function requireSystemAdmin(
+  uid: string,
+): Promise<void> {
+  const snapshot =
+    await db
+      .doc(`users/${uid}`)
+      .get();
+
+  if (
+    !snapshot.exists ||
+    snapshot.data()?.systemRole !==
+      "admin"
+  ) {
+    throw new HttpsError(
+      "permission-denied",
+      "Only cxTools administrators can create projects.",
+    );
+  }
+}
+
+/**
  * Returns whether an error is an Auth user-not-found error.
  *
  * @param {*} error Error value to inspect.
@@ -216,87 +246,282 @@ function isUserNotFound(
   );
 }
 
-export const grantProjectAccess =
-  onCall(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Sign in before managing project access.",
-      );
-    }
-
-    const projectId =
-      requireProjectId(
-        request.data?.projectId,
-      );
-
-    const email =
-      requireEmail(
-        request.data?.email,
-      );
-
-    const role =
-      requireRole(
-        request.data?.role,
-      );
-
-    await requireProjectAdmin(
-      request.auth.uid,
-      projectId,
+/**
+ * Validates and returns a project name.
+ *
+ * @param {*} value Project name value to validate.
+ * @return {string} Validated project name.
+ */
+function requireProjectName(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string"
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "A project name is required.",
     );
+  }
 
-    /*
-     * Don't allow an admin to accidentally
-     * downgrade themselves.
-     */
-    const callerEmail =
-      typeof request.auth.token.email ===
-      "string" ?
-        request.auth.token.email
-          .trim()
-          .toLowerCase() :
-        "";
+  const name =
+    value.trim();
 
-    if (
-      callerEmail === email &&
-      role !== "admin"
-    ) {
-      throw new HttpsError(
-        "failed-precondition",
-        "You cannot remove your own administrator role.",
+  if (
+    name.length < 2 ||
+    name.length > 120
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Project name must be between 2 and 120 characters.",
+    );
+  }
+
+  return name;
+}
+
+/**
+ * Converts a project name into a project ID slug.
+ *
+ * @param {string} value Project name to convert.
+ * @return {string} Project ID slug.
+ */
+function projectSlug(
+  value: string,
+): string {
+  const slug =
+    value
+      .toLowerCase()
+      .trim()
+      .replace(
+        /[^a-z0-9]+/g,
+        "-",
+      )
+      .replace(
+        /^-+|-+$/g,
+        "",
+      )
+      .slice(
+        0,
+        80,
       );
-    }
 
-    const inviteId =
-      `${projectId}__${emailHash(
-        email,
-      )}`;
+  if (!slug) {
+    throw new HttpsError(
+      "invalid-argument",
+      "The project name could not be converted into a valid project ID.",
+    );
+  }
 
-    const inviteRef =
-      db.doc(
-        `projectInvites/${inviteId}`,
+  return slug;
+}
+
+export const grantProjectAccess =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before managing project access.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      const email =
+        requireEmail(
+          request.data?.email,
+        );
+
+      const role =
+        requireRole(
+          request.data?.role,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
       );
 
-    try {
-      const user =
-        await getAuth()
-          .getUserByEmail(email);
+      /*
+      * Don't allow an admin to accidentally
+      * downgrade themselves.
+      */
+      const callerEmail =
+        typeof request.auth.token.email ===
+        "string" ?
+          request.auth.token.email
+            .trim()
+            .toLowerCase() :
+          "";
 
-      const membershipRef =
+      if (
+        callerEmail === email &&
+        role !== "admin"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "You cannot remove your own administrator role.",
+        );
+      }
+
+      const inviteId =
+        `${projectId}__${emailHash(
+          email,
+        )}`;
+
+      const inviteRef =
         db.doc(
-          `users/${user.uid}/memberships/${projectId}`,
+          `projectInvites/${inviteId}`,
         );
 
-      const memberRef =
-        db.doc(
-          `projects/${projectId}/members/${user.uid}`,
+      try {
+        const user =
+          await getAuth()
+            .getUserByEmail(email);
+
+        const membershipRef =
+          db.doc(
+            `users/${user.uid}/memberships/${projectId}`,
+          );
+
+        const memberRef =
+          db.doc(
+            `projects/${projectId}/members/${user.uid}`,
+          );
+
+        const userRef =
+          db.doc(
+            `users/${user.uid}`,
+          );
+
+        const auditRef =
+          db.collection(
+            `projects/${projectId}/auditEvents`,
+          ).doc();
+
+        const batch =
+          db.batch();
+
+        batch.set(
+          userRef,
+          {
+            email:
+              user.email ?? email,
+
+            displayName:
+              user.displayName ?? "",
+          },
+          {
+            merge: true,
+          },
         );
 
-      const userRef =
-        db.doc(
-          `users/${user.uid}`,
+        batch.set(
+          membershipRef,
+          {
+            projectId,
+            role,
+            active: true,
+
+            email:
+              user.email ?? email,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
         );
 
+        batch.set(
+          memberRef,
+          {
+            uid: user.uid,
+
+            email:
+              user.email ?? email,
+
+            displayName:
+              user.displayName ?? "",
+
+            role,
+            active: true,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+
+        /*
+        * If they previously had a pending
+        * invite, it's no longer needed.
+        */
+        batch.delete(
+          inviteRef,
+        );
+
+        batch.set(
+          auditRef,
+          {
+            eventType:
+              "project_access_granted",
+
+            targetUid:
+              user.uid,
+
+            targetEmail:
+              user.email ?? email,
+
+            role,
+
+            performedBy:
+              request.auth.uid,
+
+            createdAt:
+              FieldValue.serverTimestamp(),
+          },
+        );
+
+        await batch.commit();
+
+        return {
+          status: "active",
+          uid: user.uid,
+          email:
+            user.email ?? email,
+          displayName:
+            user.displayName ?? "",
+          role,
+        };
+      } catch (error) {
+        if (
+          !isUserNotFound(error)
+        ) {
+          throw error;
+        }
+      }
+
+      /*
+      * User has never signed into the app.
+      * Create a pending invitation instead.
+      */
       const auditRef =
         db.collection(
           `projects/${projectId}/auditEvents`,
@@ -306,31 +531,24 @@ export const grantProjectAccess =
         db.batch();
 
       batch.set(
-        userRef,
-        {
-          email:
-            user.email ?? email,
-
-          displayName:
-            user.displayName ?? "",
-        },
-        {
-          merge: true,
-        },
-      );
-
-      batch.set(
-        membershipRef,
+        inviteRef,
         {
           projectId,
+
+          email,
+
+          emailHash:
+            emailHash(email),
+
           role,
-          active: true,
 
-          email:
-            user.email ?? email,
+          status: "pending",
 
-          updatedBy:
+          createdBy:
             request.auth.uid,
+
+          createdAt:
+            FieldValue.serverTimestamp(),
 
           updatedAt:
             FieldValue.serverTimestamp(),
@@ -338,53 +556,15 @@ export const grantProjectAccess =
         {
           merge: true,
         },
-      );
-
-      batch.set(
-        memberRef,
-        {
-          uid: user.uid,
-
-          email:
-            user.email ?? email,
-
-          displayName:
-            user.displayName ?? "",
-
-          role,
-          active: true,
-
-          updatedBy:
-            request.auth.uid,
-
-          updatedAt:
-            FieldValue.serverTimestamp(),
-        },
-        {
-          merge: true,
-        },
-      );
-
-      /*
-       * If they previously had a pending
-       * invite, it's no longer needed.
-       */
-      batch.delete(
-        inviteRef,
       );
 
       batch.set(
         auditRef,
         {
           eventType:
-            "project_access_granted",
+            "project_invite_created",
 
-          targetUid:
-            user.uid,
-
-          targetEmail:
-            user.email ?? email,
-
+          targetEmail: email,
           role,
 
           performedBy:
@@ -398,189 +578,623 @@ export const grantProjectAccess =
       await batch.commit();
 
       return {
-        status: "active",
-        uid: user.uid,
-        email:
-          user.email ?? email,
-        displayName:
-          user.displayName ?? "",
+        status: "pending",
+        email,
         role,
       };
-    } catch (error) {
-      if (
-        !isUserNotFound(error)
-      ) {
-        throw error;
-      }
-    }
-
-    /*
-     * User has never signed into the app.
-     * Create a pending invitation instead.
-     */
-    const auditRef =
-      db.collection(
-        `projects/${projectId}/auditEvents`,
-      ).doc();
-
-    const batch =
-      db.batch();
-
-    batch.set(
-      inviteRef,
-      {
-        projectId,
-
-        email,
-
-        emailHash:
-          emailHash(email),
-
-        role,
-
-        status: "pending",
-
-        createdBy:
-          request.auth.uid,
-
-        createdAt:
-          FieldValue.serverTimestamp(),
-
-        updatedAt:
-          FieldValue.serverTimestamp(),
-      },
-      {
-        merge: true,
-      },
-    );
-
-    batch.set(
-      auditRef,
-      {
-        eventType:
-          "project_invite_created",
-
-        targetEmail: email,
-        role,
-
-        performedBy:
-          request.auth.uid,
-
-        createdAt:
-          FieldValue.serverTimestamp(),
-      },
-    );
-
-    await batch.commit();
-
-    return {
-      status: "pending",
-      email,
-      role,
-    };
-  });
+    },
+  );
 
 export const claimProjectInvites =
-  onCall(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Sign in before claiming invitations.",
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before claiming invitations.",
+        );
+      }
+
+      const rawEmail =
+        request.auth.token.email;
+
+      if (
+        typeof rawEmail !== "string"
+      ) {
+        return {
+          claimed: 0,
+        };
+      }
+
+      const email =
+        rawEmail
+          .trim()
+          .toLowerCase();
+
+      const hash =
+        emailHash(email);
+
+      const invites =
+        await db
+          .collection(
+            "projectInvites",
+          )
+          .where(
+            "emailHash",
+            "==",
+            hash,
+          )
+          .get();
+
+      const pending =
+        invites.docs.filter(
+          (doc) =>
+            doc.data().status ===
+            "pending",
+        );
+
+      if (
+        pending.length === 0
+      ) {
+        return {
+          claimed: 0,
+        };
+      }
+
+      const batch =
+        db.batch();
+
+      const userRef =
+        db.doc(
+          `users/${request.auth.uid}`,
+        );
+
+      batch.set(
+        userRef,
+        {
+          email,
+
+          displayName:
+            request.auth.token.name ??
+            "",
+        },
+        {
+          merge: true,
+        },
       );
-    }
 
-    const rawEmail =
-      request.auth.token.email;
+      for (
+        const inviteDoc of pending
+      ) {
+        const invite =
+          inviteDoc.data();
 
-    if (
-      typeof rawEmail !== "string"
-    ) {
+        const projectId =
+          requireProjectId(
+            invite.projectId,
+          );
+
+        const role =
+          requireRole(
+            invite.role,
+          );
+
+        const membershipRef =
+          db.doc(
+            `users/${request.auth.uid}/memberships/${projectId}`,
+          );
+
+        const memberRef =
+          db.doc(
+            `projects/${projectId}/members/${request.auth.uid}`,
+          );
+
+        const auditRef =
+          db.collection(
+            `projects/${projectId}/auditEvents`,
+          ).doc();
+
+        batch.set(
+          membershipRef,
+          {
+            projectId,
+            role,
+            active: true,
+
+            email,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+
+        batch.set(
+          memberRef,
+          {
+            uid:
+              request.auth.uid,
+
+            email,
+
+            displayName:
+              request.auth.token.name ??
+              "",
+
+            role,
+            active: true,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+
+        batch.update(
+          inviteDoc.ref,
+          {
+            status: "claimed",
+
+            claimedBy:
+              request.auth.uid,
+
+            claimedAt:
+              FieldValue.serverTimestamp(),
+          },
+        );
+
+        batch.set(
+          auditRef,
+          {
+            eventType:
+              "project_invite_claimed",
+
+            targetUid:
+              request.auth.uid,
+
+            targetEmail:
+              email,
+
+            role,
+
+            createdAt:
+              FieldValue.serverTimestamp(),
+          },
+        );
+      }
+
+      await batch.commit();
+
       return {
-        claimed: 0,
+        claimed:
+          pending.length,
       };
-    }
+    },
+  );
 
-    const email =
-      rawEmail
-        .trim()
-        .toLowerCase();
-
-    const hash =
-      emailHash(email);
-
-    const invites =
-      await db
-        .collection(
-          "projectInvites",
-        )
-        .where(
-          "emailHash",
-          "==",
-          hash,
-        )
-        .get();
-
-    const pending =
-      invites.docs.filter(
-        (doc) =>
-          doc.data().status ===
-          "pending",
-      );
-
-    if (
-      pending.length === 0
-    ) {
-      return {
-        claimed: 0,
-      };
-    }
-
-    const batch =
-      db.batch();
-
-    const userRef =
-      db.doc(
-        `users/${request.auth.uid}`,
-      );
-
-    batch.set(
-      userRef,
-      {
-        email,
-
-        displayName:
-          request.auth.token.name ??
-          "",
-      },
-      {
-        merge: true,
-      },
-    );
-
-    for (
-      const inviteDoc of pending
-    ) {
-      const invite =
-        inviteDoc.data();
+export const revokeProjectAccess =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before managing project access.",
+        );
+      }
 
       const projectId =
         requireProjectId(
-          invite.projectId,
+          request.data?.projectId,
         );
 
-      const role =
-        requireRole(
-          invite.role,
+      const email =
+        requireEmail(
+          request.data?.email,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const callerEmail =
+        typeof request.auth.token.email ===
+        "string" ?
+          request.auth.token.email
+            .trim()
+            .toLowerCase() :
+          "";
+
+      /*
+      * For now, never allow self-revocation.
+      * This prevents accidentally locking
+      * the project out of its only admin.
+      */
+      if (
+        callerEmail === email
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "You cannot revoke your own project access.",
+        );
+      }
+
+      const inviteId =
+        `${projectId}__${emailHash(
+          email,
+        )}`;
+
+      const inviteRef =
+        db.doc(
+          `projectInvites/${inviteId}`,
+        );
+
+      let user:
+        Awaited<
+          ReturnType<
+            ReturnType<
+              typeof getAuth
+            >["getUserByEmail"]
+          >
+        > |
+        null = null;
+
+      try {
+        user =
+          await getAuth()
+            .getUserByEmail(email);
+      } catch (error) {
+        if (
+          !isUserNotFound(error)
+        ) {
+          throw error;
+        }
+      }
+
+      const batch =
+        db.batch();
+
+      if (user) {
+        batch.set(
+          db.doc(
+            `users/${user.uid}/memberships/${projectId}`,
+          ),
+          {
+            active: false,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+
+        batch.set(
+          db.doc(
+            `projects/${projectId}/members/${user.uid}`,
+          ),
+          {
+            uid:
+              user.uid,
+
+            email:
+              user.email ?? email,
+
+            displayName:
+              user.displayName ?? "",
+
+            active: false,
+
+            updatedBy:
+              request.auth.uid,
+
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+      }
+
+      /*
+      * Also cancel an unclaimed invite,
+      * if one exists.
+      */
+      batch.set(
+        inviteRef,
+        {
+          projectId,
+          email,
+
+          emailHash:
+            emailHash(email),
+
+          status: "revoked",
+
+          revokedBy:
+            request.auth.uid,
+
+          revokedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      batch.set(
+        db.collection(
+          `projects/${projectId}/auditEvents`,
+        ).doc(),
+        {
+          eventType:
+            "project_access_revoked",
+
+          targetEmail:
+            email,
+
+          targetUid:
+            user?.uid ?? "",
+
+          performedBy:
+            request.auth.uid,
+
+          createdAt:
+            FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+
+      return {
+        success: true,
+        email,
+      };
+    },
+  );
+
+export const listProjectPeople =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in first.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      const callerMembership =
+        await requireProjectAdmin(
+          request.auth.uid,
+          projectId,
+        );
+
+      /*
+      * Backfill the current admin into
+      * the project-centric member index.
+      */
+      await db.doc(
+        `projects/${projectId}/members/${request.auth.uid}`,
+      ).set(
+        {
+          uid:
+            request.auth.uid,
+
+          email:
+            callerMembership.email,
+
+          role: "admin",
+
+          active: true,
+
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      const [
+        memberSnapshot,
+        inviteSnapshot,
+      ] = await Promise.all([
+        db.collection(
+          `projects/${projectId}/members`,
+        ).get(),
+
+        db.collection(
+          "projectInvites",
+        )
+          .where(
+            "projectId",
+            "==",
+            projectId,
+          )
+          .get(),
+      ]);
+
+      const members =
+        memberSnapshot.docs
+          .filter(
+            (doc) =>
+              doc.data().active === true,
+          )
+          .map((doc) => ({
+            uid: doc.id,
+            ...doc.data(),
+          }));
+
+      const pendingInvites =
+        inviteSnapshot.docs
+          .filter(
+            (doc) =>
+              doc.data().status ===
+              "pending",
+          )
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+      return {
+        members,
+        pendingInvites,
+      };
+    },
+  );
+
+export const createProject =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before creating a project.",
+        );
+      }
+
+      await requireSystemAdmin(
+        request.auth.uid,
+      );
+
+      const name =
+        requireProjectName(
+          request.data?.name,
+        );
+
+      const description =
+        typeof request.data?.description ===
+        "string" ?
+          request.data.description
+            .trim()
+            .slice(0, 500) :
+          "";
+
+      const code =
+        typeof request.data?.code ===
+        "string" ?
+          request.data.code
+            .trim()
+            .slice(0, 40) :
+          "";
+
+      const spreadsheetId =
+        typeof request.data?.spreadsheetId ===
+        "string" ?
+          request.data.spreadsheetId
+            .trim() :
+          "";
+
+      const baseProjectId =
+        projectSlug(name);
+
+      /*
+       * Start with the clean project slug.
+       */
+      let projectId =
+        baseProjectId;
+
+      let projectRef =
+        db.doc(
+          `projects/${projectId}`,
+        );
+
+      let snapshot =
+        await projectRef.get();
+
+      /*
+       * If already taken, append a small
+       * unique suffix.
+       */
+      if (snapshot.exists) {
+        const suffix =
+          Math.random()
+            .toString(36)
+            .slice(2, 7);
+
+        projectId =
+          `${baseProjectId}-${suffix}`;
+
+        projectRef =
+          db.doc(
+            `projects/${projectId}`,
+          );
+
+        snapshot =
+          await projectRef.get();
+
+        if (snapshot.exists) {
+          throw new HttpsError(
+            "already-exists",
+            [
+              "A project with this name already exists.",
+              "Try a slightly different name.",
+            ].join(" "),
+          );
+        }
+      }
+
+      const uid =
+        request.auth.uid;
+
+      const email =
+        typeof request.auth.token.email ===
+        "string" ?
+          request.auth.token.email :
+          "";
+
+      const displayName =
+        typeof request.auth.token.name ===
+        "string" ?
+          request.auth.token.name :
+          "";
+
+      const userRef =
+        db.doc(
+          `users/${uid}`,
         );
 
       const membershipRef =
         db.doc(
-          `users/${request.auth.uid}/memberships/${projectId}`,
+          `users/${uid}/memberships/${projectId}`,
         );
 
       const memberRef =
         db.doc(
-          `projects/${projectId}/members/${request.auth.uid}`,
+          `projects/${projectId}/members/${uid}`,
         );
 
       const auditRef =
@@ -588,61 +1202,84 @@ export const claimProjectInvites =
           `projects/${projectId}/auditEvents`,
         ).doc();
 
+      const batch =
+        db.batch();
+
+      batch.set(
+        projectRef,
+        {
+          name,
+
+          code,
+
+          description,
+
+          spreadsheetId,
+
+          status:
+            "draft" satisfies ProjectStatus,
+
+          createdBy:
+            uid,
+
+          createdAt:
+            FieldValue.serverTimestamp(),
+
+          updatedBy:
+            uid,
+
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+      );
+
+      batch.set(
+        userRef,
+        {
+          email,
+          displayName,
+        },
+        {
+          merge: true,
+        },
+      );
+
       batch.set(
         membershipRef,
         {
           projectId,
-          role,
+
+          role: "admin",
+
           active: true,
 
           email,
 
           updatedBy:
-            request.auth.uid,
+            uid,
 
           updatedAt:
             FieldValue.serverTimestamp(),
-        },
-        {
-          merge: true,
         },
       );
 
       batch.set(
         memberRef,
         {
-          uid:
-            request.auth.uid,
+          uid,
 
           email,
 
-          displayName:
-            request.auth.token.name ??
-            "",
+          displayName,
 
-          role,
+          role: "admin",
+
           active: true,
 
           updatedBy:
-            request.auth.uid,
+            uid,
 
           updatedAt:
-            FieldValue.serverTimestamp(),
-        },
-        {
-          merge: true,
-        },
-      );
-
-      batch.update(
-        inviteDoc.ref,
-        {
-          status: "claimed",
-
-          claimedBy:
-            request.auth.uid,
-
-          claimedAt:
             FieldValue.serverTimestamp(),
         },
       );
@@ -651,304 +1288,41 @@ export const claimProjectInvites =
         auditRef,
         {
           eventType:
-            "project_invite_claimed",
+            "project_created",
 
-          targetUid:
-            request.auth.uid,
+          performedBy:
+            uid,
 
-          targetEmail:
-            email,
+          projectId,
 
-          role,
+          projectName:
+            name,
 
           createdAt:
             FieldValue.serverTimestamp(),
         },
       );
-    }
 
-    await batch.commit();
+      await batch.commit();
 
-    return {
-      claimed:
-        pending.length,
-    };
-  });
-
-export const revokeProjectAccess =
-  onCall(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Sign in before managing project access.",
-      );
-    }
-
-    const projectId =
-      requireProjectId(
-        request.data?.projectId,
-      );
-
-    const email =
-      requireEmail(
-        request.data?.email,
-      );
-
-    await requireProjectAdmin(
-      request.auth.uid,
-      projectId,
-    );
-
-    const callerEmail =
-      typeof request.auth.token.email ===
-      "string" ?
-        request.auth.token.email
-          .trim()
-          .toLowerCase() :
-        "";
-
-    /*
-     * For now, never allow self-revocation.
-     * This prevents accidentally locking
-     * the project out of its only admin.
-     */
-    if (
-      callerEmail === email
-    ) {
-      throw new HttpsError(
-        "failed-precondition",
-        "You cannot revoke your own project access.",
-      );
-    }
-
-    const inviteId =
-      `${projectId}__${emailHash(
-        email,
-      )}`;
-
-    const inviteRef =
-      db.doc(
-        `projectInvites/${inviteId}`,
-      );
-
-    let user:
-      Awaited<
-        ReturnType<
-          ReturnType<
-            typeof getAuth
-          >["getUserByEmail"]
-        >
-      > |
-      null = null;
-
-    try {
-      user =
-        await getAuth()
-          .getUserByEmail(email);
-    } catch (error) {
-      if (
-        !isUserNotFound(error)
-      ) {
-        throw error;
-      }
-    }
-
-    const batch =
-      db.batch();
-
-    if (user) {
-      batch.set(
-        db.doc(
-          `users/${user.uid}/memberships/${projectId}`,
-        ),
-        {
-          active: false,
-
-          updatedBy:
-            request.auth.uid,
-
-          updatedAt:
-            FieldValue.serverTimestamp(),
-        },
-        {
-          merge: true,
-        },
-      );
-
-      batch.set(
-        db.doc(
-          `projects/${projectId}/members/${user.uid}`,
-        ),
-        {
-          uid:
-            user.uid,
-
-          email:
-            user.email ?? email,
-
-          displayName:
-            user.displayName ?? "",
-
-          active: false,
-
-          updatedBy:
-            request.auth.uid,
-
-          updatedAt:
-            FieldValue.serverTimestamp(),
-        },
-        {
-          merge: true,
-        },
-      );
-    }
-
-    /*
-     * Also cancel an unclaimed invite,
-     * if one exists.
-     */
-    batch.set(
-      inviteRef,
-      {
+      return {
         projectId,
-        email,
 
-        emailHash:
-          emailHash(email),
+        project: {
+          id:
+            projectId,
 
-        status: "revoked",
+          name,
 
-        revokedBy:
-          request.auth.uid,
+          code,
 
-        revokedAt:
-          FieldValue.serverTimestamp(),
-      },
-      {
-        merge: true,
-      },
-    );
+          description,
 
-    batch.set(
-      db.collection(
-        `projects/${projectId}/auditEvents`,
-      ).doc(),
-      {
-        eventType:
-          "project_access_revoked",
+          spreadsheetId,
 
-        targetEmail:
-          email,
-
-        targetUid:
-          user?.uid ?? "",
-
-        performedBy:
-          request.auth.uid,
-
-        createdAt:
-          FieldValue.serverTimestamp(),
-      },
-    );
-
-    await batch.commit();
-
-    return {
-      success: true,
-      email,
-    };
-  });
-
-export const listProjectPeople =
-  onCall(async (request) => {
-    if (!request.auth) {
-      throw new HttpsError(
-        "unauthenticated",
-        "Sign in first.",
-      );
-    }
-
-    const projectId =
-      requireProjectId(
-        request.data?.projectId,
-      );
-
-    const callerMembership =
-      await requireProjectAdmin(
-        request.auth.uid,
-        projectId,
-      );
-
-    /*
-     * Backfill the current admin into
-     * the project-centric member index.
-     */
-    await db.doc(
-      `projects/${projectId}/members/${request.auth.uid}`,
-    ).set(
-      {
-        uid:
-          request.auth.uid,
-
-        email:
-          callerMembership.email,
-
-        role: "admin",
-
-        active: true,
-
-        updatedAt:
-          FieldValue.serverTimestamp(),
-      },
-      {
-        merge: true,
-      },
-    );
-
-    const [
-      memberSnapshot,
-      inviteSnapshot,
-    ] = await Promise.all([
-      db.collection(
-        `projects/${projectId}/members`,
-      ).get(),
-
-      db.collection(
-        "projectInvites",
-      )
-        .where(
-          "projectId",
-          "==",
-          projectId,
-        )
-        .get(),
-    ]);
-
-    const members =
-      memberSnapshot.docs
-        .filter(
-          (doc) =>
-            doc.data().active === true,
-        )
-        .map((doc) => ({
-          uid: doc.id,
-          ...doc.data(),
-        }));
-
-    const pendingInvites =
-      inviteSnapshot.docs
-        .filter(
-          (doc) =>
-            doc.data().status ===
-            "pending",
-        )
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-    return {
-      members,
-      pendingInvites,
-    };
-  });
+          status:
+            "draft",
+        },
+      };
+    },
+  );

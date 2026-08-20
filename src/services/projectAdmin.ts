@@ -32,6 +32,26 @@ export interface ProjectPeople {
     PendingProjectInvite[];
 }
 
+export interface CreateProjectInput {
+  name: string;
+  code: string;
+  description: string;
+  spreadsheetId: string;
+}
+
+export interface CreateProjectResult {
+  projectId: string;
+
+  project: {
+    id: string;
+    name: string;
+    code: string;
+    description: string;
+    spreadsheetId: string;
+    status: "draft";
+  };
+}
+
 interface GrantProjectAccessInput {
   projectId: string;
   email: string;
@@ -94,6 +114,15 @@ const claimProjectInvitesCallable =
     "claimProjectInvites",
   );
 
+const createProjectCallable =
+  httpsCallable<
+    CreateProjectInput,
+    CreateProjectResult
+  >(
+    firebaseFunctions,
+    "createProject",
+  );
+
 export async function listProjectPeople(
   projectId: string,
 ): Promise<ProjectPeople> {
@@ -138,4 +167,15 @@ export async function claimProjectInvites():
     );
 
   return response.data.claimed;
+}
+
+export async function createProject(
+  input: CreateProjectInput,
+): Promise<CreateProjectResult> {
+  const response =
+    await createProjectCallable(
+      input,
+    );
+
+  return response.data;
 }

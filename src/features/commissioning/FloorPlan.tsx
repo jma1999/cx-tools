@@ -2023,15 +2023,17 @@ export default function FloorPlan({
                   role="img"
                   aria-label={`Floor ${floor} selectable lighting commissioning plan`}
                 >
-                  <image
-                    href={planImageUrl}
-                    x="0"
-                    y="0"
-                    width={planWidth}
-                    height={planHeight}
-                    preserveAspectRatio="xMidYMid meet"
-                    pointerEvents="none"
-                  />
+                  {planImageUrl && (
+                    <image
+                      href={planImageUrl}
+                      x="0"
+                      y="0"
+                      width={planWidth}
+                      height={planHeight}
+                      preserveAspectRatio="xMidYMid meet"
+                      pointerEvents="none"
+                    />
+                  )}
 
                   {regionData.regions.map((region) => {
                     const assignedSpace = region.assignedSpaceId

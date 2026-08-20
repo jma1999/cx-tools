@@ -19,6 +19,15 @@ import {
   claimProjectInvites,
 } from "../services/projectAdmin";
 
+import {
+  doc,
+  getDoc,
+} from "firebase/firestore";
+
+import {
+  firestoreDb,
+} from "../auth/firebase";
+
 export default function ProjectsPage() {
   const {
     appUser,
@@ -40,9 +49,15 @@ export default function ProjectsPage() {
     setProjectsError,
   ] = useState("");
 
+  const [
+    isSystemAdmin,
+    setIsSystemAdmin,
+  ] = useState(false);
+
   useEffect(() => {
     if (!appUser) {
       setAccessibleProjects([]);
+      setIsSystemAdmin(false);
       setProjectsLoading(false);
       return;
     }
@@ -55,28 +70,62 @@ export default function ProjectsPage() {
 
       try {
         /*
-        * Converts any pending email
-        * invitations into memberships first.
+        * Pending invite claiming is optional.
+        * A failure here must never prevent an
+        * existing user from seeing their projects.
         */
-        await claimProjectInvites();
+        try {
+          await claimProjectInvites();
+        } catch (claimError) {
+          console.error(
+            "Project invite claiming failed:",
+            claimError,
+          );
+        }
 
-        const projects =
+        try {
+          const userSnapshot =
+            await getDoc(
+              doc(
+                firestoreDb,
+                "users",
+                appUser.uid,
+              ),
+            );
+
+          setIsSystemAdmin(
+            userSnapshot.data()?.systemRole ===
+              "admin",
+          );
+        } catch (adminError) {
+          console.error(
+            "System admin lookup failed:",
+            adminError,
+          );
+
+          setIsSystemAdmin(false);
+        }
+
+        const loadedProjects =
           await loadUserProjects(
             appUser.uid,
           );
 
-        if (!cancelled) {
-          setAccessibleProjects(projects);
-        }
+        setAccessibleProjects(loadedProjects);
       } catch (error) {
-        if (!cancelled) {
-          setProjectsError(
-            error instanceof Error
-              ? error.message
-              : "Projects could not be loaded.",
-          );
-        }
-      } finally {
+        console.error(
+          "Project loading failed:",
+          error,
+        );
+
+        setProjectsError(
+          error instanceof Error
+            ? error.message
+            : "Projects could not be loaded.",
+        );
+      } 
+      
+      finally {
         if (!cancelled) {
           setProjectsLoading(false);
         }
@@ -99,6 +148,15 @@ export default function ProjectsPage() {
           </p>
 
           <h1>Projects</h1>
+
+          {isSystemAdmin && (
+            <Link
+              className="projects-admin-button"
+              to="/admin/projects"
+            >
+              Admin
+            </Link>
+          )}
 
           <p>
             Select a project to open its
