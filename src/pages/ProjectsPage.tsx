@@ -15,6 +15,10 @@ import type {
   AccessibleProject,
 } from "../projects/projectTypes";
 
+import {
+  claimProjectInvites,
+} from "../services/projectAdmin";
+
 export default function ProjectsPage() {
   const {
     appUser,
@@ -50,6 +54,12 @@ export default function ProjectsPage() {
       setProjectsError("");
 
       try {
+        /*
+        * Converts any pending email
+        * invitations into memberships first.
+        */
+        await claimProjectInvites();
+
         const projects =
           await loadUserProjects(
             appUser.uid,
