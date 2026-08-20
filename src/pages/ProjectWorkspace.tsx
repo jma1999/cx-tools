@@ -163,6 +163,14 @@ export default function ProjectWorkspace() {
           &lt;&lt; All projects
         </Link>
 
+        {permissions.canManageMembers && (
+          <Link
+            className="workspace-admin-link"
+            to={`/projects/${project.id}/admin`}
+          >
+            Admin
+          </Link>
+        )}
         
       </nav>
 
