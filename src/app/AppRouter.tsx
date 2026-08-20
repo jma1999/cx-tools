@@ -10,6 +10,7 @@ import LoginPage from "../pages/LoginPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ProjectWorkspacePage from "../pages/ProjectWorkspacePage";
 import ProjectAdminPage from "../pages/ProjectAdminPage";
+import AdminProjectsPage from "../pages/AdminProjectsPage";
 
 export default function AppRouter() {
   return (
@@ -44,6 +45,13 @@ export default function AppRouter() {
               to="/projects"
               replace
             />
+          }
+        />
+
+        <Route
+          path="/admin/projects"
+          element={
+            <AdminProjectsPage />
           }
         />
       </Routes>
