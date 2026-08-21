@@ -58,6 +58,19 @@ export interface ProjectSetupFloor {
   order: number;
 }
 
+export interface AdminProjectSummary {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  spreadsheetId: string;
+
+  status:
+    | "draft"
+    | "active"
+    | "archived";
+}
+
 interface GrantProjectAccessInput {
   projectId: string;
   email: string;
@@ -86,6 +99,11 @@ interface UpsertProjectFloorInput {
 
 interface UpsertProjectFloorResult {
   floor: ProjectSetupFloor;
+}
+
+interface ListAdminProjectsResult {
+  projects:
+    AdminProjectSummary[];
 }
 
 const grantProjectAccessCallable =
@@ -149,6 +167,15 @@ const upsertProjectFloorCallable =
     "upsertProjectFloor",
   );
 
+const listAdminProjectsCallable =
+  httpsCallable<
+    Record<string, never>,
+    ListAdminProjectsResult
+  >(
+    firebaseFunctions,
+    "listAdminProjects",
+  );
+  
 export async function listProjectPeople(
   projectId: string,
 ): Promise<ProjectPeople> {
@@ -221,4 +248,14 @@ export async function upsertProjectFloor(
     });
 
   return response.data.floor;
+}
+
+export async function listAdminProjects():
+  Promise<AdminProjectSummary[]> {
+  const response =
+    await listAdminProjectsCallable(
+      {},
+    );
+
+  return response.data.projects;
 }

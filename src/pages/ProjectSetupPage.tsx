@@ -29,6 +29,14 @@ import type {
   ProjectSetupFloor,
 } from "../services/projectAdmin";
 
+import {
+  validateCommissioningWorkbook,
+} from "../services/commissioningImport";
+
+import type {
+  CommissioningImportSummary,
+} from "../services/commissioningImport";
+
 interface SetupProject {
   id: string;
   name: string;
@@ -88,6 +96,26 @@ export default function ProjectSetupPage() {
     error,
     setError,
   ] = useState("");
+
+  const [
+    commissioningFile,
+    setCommissioningFile,
+  ] = useState<File | null>(
+    null,
+  );
+
+  const [
+    importSummary,
+    setImportSummary,
+  ] =
+    useState<CommissioningImportSummary | null>(
+      null,
+    );
+
+  const [
+    validatingImport,
+    setValidatingImport,
+  ] = useState(false);
 
   async function loadSetup():
     Promise<void> {
@@ -226,21 +254,36 @@ export default function ProjectSetupPage() {
     setMessage("");
 
     try {
-      await upsertProjectFloor(
-        projectId,
-        floorId.trim(),
-        floorLabel.trim(),
-        floors.length + 1,
-      );
+      const savedFloor =
+        await upsertProjectFloor(
+          projectId,
+          floorId.trim(),
+          floorLabel.trim(),
+          floors.length + 1,
+        );
+
+      setFloors((current) => {
+        const withoutExisting =
+          current.filter(
+            (floor) =>
+              floor.id !== savedFloor.id,
+          );
+
+        return [
+          ...withoutExisting,
+          savedFloor,
+        ].sort(
+          (a, b) =>
+            a.order - b.order,
+        );
+      });
 
       setFloorId("");
       setFloorLabel("");
 
       setMessage(
-        "Floor added successfully.",
+        `${savedFloor.label} added successfully.`,
       );
-
-      await loadSetup();
     } catch (err) {
       setError(
         err instanceof Error
@@ -509,6 +552,225 @@ export default function ProjectSetupPage() {
             )
           )}
         </div>
+      </section>
+
+      <section className="admin-section">
+        <div className="admin-section-heading">
+          <div>
+            <h2>
+              Commissioning data
+            </h2>
+
+            <p>
+              Complete our Excel template
+              and cxTools will convert it
+              into the application data
+              automatically.
+            </p>
+          </div>
+        </div>
+
+        <div className="commissioning-import-card">
+          <div className="commissioning-template-block">
+            <div>
+              <strong>
+                cxTools Excel template
+              </strong>
+
+              <p>
+                Includes lighting fixtures,
+                controls, ELE-panel samples
+                and circuit definitions.
+              </p>
+            </div>
+
+            <a
+              className="secondary-button"
+              href="/templates/cxTools-commissioning-data-template.xlsx"
+              download
+            >
+              Download Excel template
+            </a>
+          </div>
+
+          <div className="commissioning-upload-block">
+            <label className="commissioning-file-picker">
+              <span>
+                Upload completed workbook
+              </span>
+
+              <input
+                type="file"
+                accept=".xlsx"
+                disabled={
+                  validatingImport
+                }
+                onChange={async (
+                  event,
+                ) => {
+                  const file =
+                    event.target
+                      .files?.[0];
+
+                  if (!file) {
+                    return;
+                  }
+
+                  setCommissioningFile(
+                    file,
+                  );
+
+                  setImportSummary(
+                    null,
+                  );
+
+                  setError("");
+                  setMessage("");
+
+                  setValidatingImport(
+                    true,
+                  );
+
+                  try {
+                    const summary =
+                      await validateCommissioningWorkbook(
+                        file,
+                      );
+
+                    setImportSummary(
+                      summary,
+                    );
+                  } catch (err) {
+                    setError(
+                      err instanceof
+                      Error
+                        ? err.message
+                        : "The workbook could not be read.",
+                    );
+                  } finally {
+                    setValidatingImport(
+                      false,
+                    );
+                  }
+                }}
+              />
+            </label>
+
+            {commissioningFile && (
+              <div className="uploaded-file-name">
+                {
+                  commissioningFile.name
+                }
+              </div>
+            )}
+
+            {validatingImport && (
+              <div className="admin-empty-state">
+                Checking workbook…
+              </div>
+            )}
+          </div>
+        </div>
+
+        {importSummary && (
+          <div className="import-validation-results">
+            <div className="import-summary-grid">
+              <div>
+                <span>
+                  Spaces
+                </span>
+
+                <strong>
+                  {
+                    importSummary.spaces
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Fixture / control items
+                </span>
+
+                <strong>
+                  {
+                    importSummary
+                      .commissioningItems
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  ELE-panel samples
+                </span>
+
+                <strong>
+                  {
+                    importSummary
+                      .panelTests
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Panel circuits
+                </span>
+
+                <strong>
+                  {
+                    importSummary
+                      .panelCircuits
+                  }
+                </strong>
+              </div>
+            </div>
+
+            {importSummary.errors.length ===
+            0 ? (
+              <div className="admin-success-message">
+                Workbook passed
+                structural validation.
+              </div>
+            ) : (
+              <div className="import-issue-list">
+                <strong>
+                  Fix these before import
+                </strong>
+
+                {importSummary.errors.map(
+                  (
+                    issue,
+                    index,
+                  ) => (
+                    <div
+                      key={
+                        `${issue.sheet}-${issue.row}-${index}`
+                      }
+                      className="import-error-row"
+                    >
+                      <span>
+                        {
+                          issue.sheet
+                        }
+                        {issue.row
+                          ? ` · Row ${issue.row}`
+                          : ""}
+                      </span>
+
+                      <p>
+                        {
+                          issue.message
+                        }
+                      </p>
+                    </div>
+                  ),
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {floors.length > 0 && (

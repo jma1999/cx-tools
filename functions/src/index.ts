@@ -1538,3 +1538,80 @@ export const upsertProjectFloor =
       };
     },
   );
+
+export const listAdminProjects =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before viewing project administration.",
+        );
+      }
+
+      await requireSystemAdmin(
+        request.auth.uid,
+      );
+
+      const projectSnapshot =
+        await db
+          .collection("projects")
+          .get();
+
+      const projects =
+        projectSnapshot.docs.map(
+          (projectDoc) => {
+            const data =
+              projectDoc.data();
+
+            return {
+              id: projectDoc.id,
+
+              name:
+                typeof data.name ===
+                "string" ?
+                  data.name :
+                  projectDoc.id,
+
+              code:
+                typeof data.code ===
+                "string" ?
+                  data.code :
+                  "",
+
+              description:
+                typeof data.description ===
+                "string" ?
+                  data.description :
+                  "",
+
+              spreadsheetId:
+                typeof data.spreadsheetId ===
+                "string" ?
+                  data.spreadsheetId :
+                  "",
+
+              status:
+                data.status === "draft" ||
+                data.status === "archived" ?
+                  data.status :
+                  "active",
+            };
+          },
+        );
+
+      projects.sort(
+        (a, b) =>
+          a.name.localeCompare(
+            b.name,
+          ),
+      );
+
+      return {
+        projects,
+      };
+    },
+  );

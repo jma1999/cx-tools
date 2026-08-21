@@ -9,12 +9,8 @@ import {
 } from "react-router-dom";
 
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  orderBy,
-  query,
 } from "firebase/firestore";
 
 import {
@@ -27,22 +23,16 @@ import {
 
 import {
   createProject,
+  listAdminProjects,
 } from "../services/projectAdmin";
 
-interface AdminProjectSummary {
-  id: string;
-  name: string;
-  code: string;
-  description: string;
-  status:
-    | "draft"
-    | "active"
-    | "archived";
-}
+import type {
+  AdminProjectSummary,
+} from "../services/projectAdmin";
 
 export default function AdminProjectsPage() {
   const {
-    user,
+    appUser,
   } = useAuth();
 
   const navigate =
@@ -105,7 +95,8 @@ export default function AdminProjectsPage() {
 
   async function loadAdminProjects():
     Promise<void> {
-    if (!user) {
+    if (!appUser) {
+      setLoading(false);
       return;
     }
 
@@ -118,7 +109,7 @@ export default function AdminProjectsPage() {
           doc(
             firestoreDb,
             "users",
-            user.uid,
+            appUser.uid,
           ),
         );
 
@@ -135,55 +126,11 @@ export default function AdminProjectsPage() {
         return;
       }
 
-      const snapshot =
-        await getDocs(
-          query(
-            collection(
-              firestoreDb,
-              "projects",
-            ),
-            orderBy("name"),
-          ),
-        );
+      const loadedProjects =
+        await listAdminProjects();
 
       setProjects(
-        snapshot.docs.map(
-          (projectDoc) => {
-            const data =
-              projectDoc.data();
-
-            return {
-              id:
-                projectDoc.id,
-
-              name:
-                typeof data.name ===
-                "string"
-                  ? data.name
-                  : projectDoc.id,
-
-              code:
-                typeof data.code ===
-                "string"
-                  ? data.code
-                  : "",
-
-              description:
-                typeof data.description ===
-                "string"
-                  ? data.description
-                  : "",
-
-              status:
-                data.status ===
-                  "draft" ||
-                data.status ===
-                  "archived"
-                  ? data.status
-                  : "active",
-            };
-          },
-        ),
+        loadedProjects,
       );
     } catch (err) {
       setError(
@@ -198,7 +145,7 @@ export default function AdminProjectsPage() {
 
   useEffect(() => {
     void loadAdminProjects();
-  }, [user?.uid]);
+  }, [appUser?.uid]);
 
   async function handleCreateProject():
     Promise<void> {
