@@ -130,6 +130,7 @@ import {
   
   async function loadProjectDocument(
     projectId: string,
+    preloadedProjectData?: DocumentData,
   ): Promise<ProjectConfig | null> {
     const projectReference = doc(
       firestoreDb,
@@ -137,15 +138,20 @@ import {
       projectId,
     );
   
-    const projectSnapshot =
-      await getDoc(projectReference);
-  
-    if (!projectSnapshot.exists()) {
-      return null;
+    let projectData =
+      preloadedProjectData;
+
+    if (!projectData) {
+      const projectSnapshot =
+        await getDoc(projectReference);
+
+      if (!projectSnapshot.exists()) {
+        return null;
+      }
+
+      projectData =
+        projectSnapshot.data();
     }
-  
-    const projectData =
-      projectSnapshot.data();
   
     const floorsSnapshot = await getDocs(
       collection(
@@ -184,7 +190,7 @@ import {
         : "active";
   
     return {
-      id: projectSnapshot.id,
+      id: projectId,
   
       name: requiredString(
         projectData,
@@ -252,18 +258,48 @@ import {
           async (
             membership,
           ): Promise<AccessibleProject | null> => {
-            const project =
-              await loadProjectDocument(
+            const projectReference =
+              doc(
+                firestoreDb,
+                "projects",
                 membership.projectId,
               );
-  
+
+            const projectSnapshot =
+              await getDoc(
+                projectReference,
+              );
+
             if (
-              !project ||
-              project.status === "archived"
+              !projectSnapshot.exists()
             ) {
               return null;
             }
-  
+
+            const projectData =
+              projectSnapshot.data();
+
+            /*
+            * Draft and archived projects belong
+            * in the Admin console, not the normal
+            * commissioning Projects page.
+            */
+            if (
+              projectData.status !== "active"
+            ) {
+              return null;
+            }
+
+            const project =
+              await loadProjectDocument(
+                membership.projectId,
+                projectData,
+              );
+
+            if (!project) {
+              return null;
+            }
+
             return {
               project,
               membership,

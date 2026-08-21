@@ -2642,3 +2642,129 @@ button:disabled {
   color: #64748b;
   font-size: 12px;
 }
+
+.commissioning-import-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.commissioning-template-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.commissioning-template-block strong {
+  font-size: 13px;
+}
+
+.commissioning-template-block p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.commissioning-upload-block {
+  padding: 18px;
+  border: 1px dashed #b9c7d8;
+  border-radius: 12px;
+}
+
+.commissioning-file-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.commissioning-file-picker > span {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.uploaded-file-name {
+  margin-top: 10px;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.import-validation-results {
+  margin-top: 18px;
+}
+
+.import-summary-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.import-summary-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.import-summary-grid span {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.import-summary-grid strong {
+  color: #174f2b;
+  font-size: 18px;
+}
+
+.import-issue-list {
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff7f7;
+}
+
+.import-error-row {
+  padding: 10px 0;
+  border-bottom: 1px solid #fee2e2;
+}
+
+.import-error-row:last-child {
+  border-bottom: 0;
+}
+
+.import-error-row span {
+  color: #991b1b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.import-error-row p {
+  margin: 4px 0 0;
+  color: #7f1d1d;
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .commissioning-template-block {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .import-summary-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
