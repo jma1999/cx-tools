@@ -1831,3 +1831,124 @@ export const commitCommissioningImport =
       };
     },
   );
+
+export const commitProjectFloorAssets =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before updating project files.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      const floorId =
+        requireFloorId(
+          request.data?.floorId,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const planPath =
+        typeof request.data
+          ?.planPath ===
+        "string" ?
+          request.data
+            .planPath :
+          "";
+
+      const regionsUrl =
+        typeof request.data
+          ?.regionsUrl ===
+        "string" ?
+          request.data
+            .regionsUrl :
+          "";
+
+      const expectedPlan =
+        `projects/${projectId}/floors/${floorId}/plans/base.svg`;
+
+      const expectedRegions =
+        `projects/${projectId}/floors/${floorId}/data/regions.json`;
+
+      if (
+        planPath !==
+        expectedPlan
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "The floor plan path is invalid.",
+        );
+      }
+
+      if (
+        regionsUrl !==
+        expectedRegions
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "The region file path is invalid.",
+        );
+      }
+
+      const floorRef =
+        db.doc(
+          `projects/${projectId}/floors/${floorId}`,
+        );
+
+      const snapshot =
+        await floorRef.get();
+
+      if (
+        !snapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          `Floor ${floorId} does not exist.`,
+        );
+      }
+
+      await floorRef.set(
+        {
+          planPath,
+          regionsUrl,
+          updatedBy:
+            request.auth.uid,
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      await db
+        .collection(
+          `projects/${projectId}/auditEvents`,
+        )
+        .add({
+          eventType:
+            "floor_visual_assets_saved",
+          floorId,
+          performedBy:
+            request.auth.uid,
+          createdAt:
+            FieldValue.serverTimestamp(),
+        });
+
+      return {
+        success: true,
+      };
+    },
+  );
