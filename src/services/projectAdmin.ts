@@ -56,6 +56,11 @@ export interface ProjectSetupFloor {
   id: string;
   label: string;
   order: number;
+
+  spacesUrl?: string;
+  regionsUrl?: string;
+  panelTestsUrl?: string;
+  planPath?: string;
 }
 
 export interface AdminProjectSummary {
@@ -201,6 +206,22 @@ const commitCommissioningImportCallable =
     "commitCommissioningImport",
   );
   
+const commitProjectFloorAssetsCallable =
+  httpsCallable<
+    {
+      projectId: string;
+      floorId: string;
+      planPath: string;
+      regionsUrl: string;
+    },
+    {
+      success: boolean;
+    }
+  >(
+    firebaseFunctions,
+    "commitProjectFloorAssets",
+  );
+
 export async function listProjectPeople(
   projectId: string,
 ): Promise<ProjectPeople> {
@@ -295,5 +316,19 @@ export async function commitCommissioningImport(
     projectId,
     sourceWorkbookPath,
     floors,
+  });
+}
+
+export async function commitProjectFloorAssets(
+  projectId: string,
+  floorId: string,
+  planPath: string,
+  regionsUrl: string,
+): Promise<void> {
+  await commitProjectFloorAssetsCallable({
+    projectId,
+    floorId,
+    planPath,
+    regionsUrl,
   });
 }

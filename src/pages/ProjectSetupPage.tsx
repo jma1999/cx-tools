@@ -43,6 +43,8 @@ import {
   uploadCommissioningImport,
 } from "../services/projectSetupAssets";
 
+import FloorFilesCard from "../features/projectSetup/FloorFilesCard";
+
 interface SetupProject {
   id: string;
   name: string;
@@ -237,6 +239,30 @@ export default function ProjectSetupPage() {
                   "number"
                   ? floorData.order
                   : 0,
+
+              spacesUrl:
+                typeof floorData.spacesUrl ===
+                "string"
+                  ? floorData.spacesUrl
+                  : "",
+
+              regionsUrl:
+                typeof floorData.regionsUrl ===
+                "string"
+                  ? floorData.regionsUrl
+                  : "",
+
+              panelTestsUrl:
+                typeof floorData.panelTestsUrl ===
+                "string"
+                  ? floorData.panelTestsUrl
+                  : "",
+
+              planPath:
+                typeof floorData.planPath ===
+                "string"
+                  ? floorData.planPath
+                  : "",
             };
           },
         ),
@@ -953,6 +979,41 @@ export default function ProjectSetupPage() {
             )}
           </section>
         </>
+      )}
+
+      {activeStep === 3 && (
+        <section className="admin-section">
+          <div className="admin-section-heading">
+            <div>
+              <h2>
+                Floor files
+              </h2>
+
+              <p>
+                Add the visual floor files
+                and panel references for
+                each configured floor.
+              </p>
+            </div>
+          </div>
+
+          <div className="floor-files-list">
+            {floors.map(
+              (floor) => (
+                <FloorFilesCard
+                  key={floor.id}
+                  projectId={
+                    projectId!
+                  }
+                  floor={floor}
+                  onUpdated={
+                    loadSetup
+                  }
+                />
+              ),
+            )}
+          </div>
+        </section>
       )}
     </main>
   );
