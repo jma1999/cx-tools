@@ -86,7 +86,9 @@ export async function loadImageAsset(
   revoke: boolean;
 }> {
   if (
-    assetReference.startsWith("/")
+    assetReference.startsWith("/") ||
+    assetReference.startsWith("http://") ||
+    assetReference.startsWith("https://")
   ) {
     return {
       url: assetReference,
@@ -94,11 +96,17 @@ export async function loadImageAsset(
     };
   }
 
-  return {
-    url:
-      await loadProtectedObjectUrl(
+  const blob = 
+    await getBlob(
+      ref(
+        firebaseStorage,
         assetReference,
       ),
+    );
+
+  return {
+    url:
+      URL.createObjectURL(blob),
 
     revoke: true,
   };

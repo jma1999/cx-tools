@@ -224,25 +224,9 @@ export default function AdminProjectsPage() {
             spreadsheetId.trim(),
         });
 
-      /*
-      * Move the UI into a completed state.
-      */
-      setShowCreateForm(false);
-
-      setName("");
-      setCode("");
-      setDescription("");
-      setSpreadsheetId("");
-
-      setMessage(
-        `Draft project "${result.project.name}" created successfully.`,
+      navigate(
+        `/admin/projects/${result.projectId}/setup`,
       );
-
-      /*
-      * Reload Firestore so the new draft appears
-      * immediately under All projects.
-      */
-      await loadAdminProjects();
 
     } catch (err) {
       setError(

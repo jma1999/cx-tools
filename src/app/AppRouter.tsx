@@ -11,6 +11,7 @@ import ProjectsPage from "../pages/ProjectsPage";
 import ProjectWorkspacePage from "../pages/ProjectWorkspacePage";
 import ProjectAdminPage from "../pages/ProjectAdminPage";
 import AdminProjectsPage from "../pages/AdminProjectsPage";
+import ProjectSetupPage from "../pages/ProjectSetupPage";
 
 export default function AppRouter() {
   return (
@@ -35,6 +36,11 @@ export default function AppRouter() {
           <Route
             path="/projects/:projectId/admin"
             element={<ProjectAdminPage />}
+          />
+
+          <Route
+            path="/admin/projects/:projectId/setup"
+            element={<ProjectSetupPage />}
           />
         </Route>
 

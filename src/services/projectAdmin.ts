@@ -52,6 +52,12 @@ export interface CreateProjectResult {
   };
 }
 
+export interface ProjectSetupFloor {
+  id: string;
+  label: string;
+  order: number;
+}
+
 interface GrantProjectAccessInput {
   projectId: string;
   email: string;
@@ -69,6 +75,17 @@ interface GrantProjectAccessResult {
 interface RevokeProjectAccessInput {
   projectId: string;
   email: string;
+}
+
+interface UpsertProjectFloorInput {
+  projectId: string;
+  floorId: string;
+  label: string;
+  order: number;
+}
+
+interface UpsertProjectFloorResult {
+  floor: ProjectSetupFloor;
 }
 
 const grantProjectAccessCallable =
@@ -121,6 +138,15 @@ const createProjectCallable =
   >(
     firebaseFunctions,
     "createProject",
+  );
+
+const upsertProjectFloorCallable =
+  httpsCallable<
+    UpsertProjectFloorInput,
+    UpsertProjectFloorResult
+  >(
+    firebaseFunctions,
+    "upsertProjectFloor",
   );
 
 export async function listProjectPeople(
@@ -178,4 +204,21 @@ export async function createProject(
     );
 
   return response.data;
+}
+
+export async function upsertProjectFloor(
+  projectId: string,
+  floorId: string,
+  label: string,
+  order: number,
+): Promise<ProjectSetupFloor> {
+  const response =
+    await upsertProjectFloorCallable({
+      projectId,
+      floorId,
+      label,
+      order,
+    });
+
+  return response.data.floor;
 }
