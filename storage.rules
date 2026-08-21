@@ -63,6 +63,26 @@ service firebase.storage {
         if isProjectAdmin(projectId);
     }
 
+    match /projects/{projectId}/source/{fileName} {
+      allow read:
+        if hasMembership(projectId);
+
+      allow create, update:
+        if isProjectAdmin(projectId)
+        && request.resource.size
+          < 20 * 1024 * 1024
+        && (
+          request.resource.contentType
+            == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ||
+          request.resource.contentType
+            == "text/csv"
+        );
+
+      allow delete:
+        if isProjectAdmin(projectId);
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

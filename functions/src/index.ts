@@ -1615,3 +1615,219 @@ export const listAdminProjects =
       };
     },
   );
+
+export const commitCommissioningImport =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before importing commissioning data.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const projectRef =
+        db.doc(
+          `projects/${projectId}`,
+        );
+
+      const projectSnapshot =
+        await projectRef.get();
+
+      if (
+        !projectSnapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          "The project could not be found.",
+        );
+      }
+
+      if (
+        projectSnapshot.data()
+          ?.status !== "draft"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          [
+            "Commissioning setup data can only be imported",
+            "while the project is in draft.",
+          ].join(" "),
+        );
+      }
+
+      const inputFloors =
+        request.data?.floors;
+
+      if (
+        !Array.isArray(
+          inputFloors,
+        ) ||
+        inputFloors.length ===
+          0
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "At least one floor is required.",
+        );
+      }
+
+      const sourceWorkbookPath =
+        typeof request.data
+          ?.sourceWorkbookPath ===
+        "string" ?
+          request.data
+            .sourceWorkbookPath :
+          "";
+
+      const expectedSourcePrefix =
+        `projects/${projectId}/source/`;
+
+      if (
+        !sourceWorkbookPath.startsWith(
+          expectedSourcePrefix,
+        )
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "The source workbook path is invalid.",
+        );
+      }
+
+      const batch =
+        db.batch();
+
+      for (
+        const inputFloor
+        of inputFloors
+      ) {
+        const floorId =
+          requireFloorId(
+            inputFloor?.floorId,
+          );
+
+        const spacesUrl =
+          typeof inputFloor
+            ?.spacesUrl ===
+          "string" ?
+            inputFloor
+              .spacesUrl :
+            "";
+
+        const panelTestsUrl =
+          typeof inputFloor
+            ?.panelTestsUrl ===
+          "string" ?
+            inputFloor
+              .panelTestsUrl :
+            "";
+
+        const expectedPrefix =
+          `projects/${projectId}/floors/${floorId}/data/`;
+
+        if (
+          spacesUrl !==
+          `${expectedPrefix}spaces.json`
+        ) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Invalid spaces path for Floor ${floorId}.`,
+          );
+        }
+
+        if (
+          panelTestsUrl !==
+          `${expectedPrefix}panel-tests.json`
+        ) {
+          throw new HttpsError(
+            "invalid-argument",
+            `Invalid panel testing path for Floor ${floorId}.`,
+          );
+        }
+
+        const floorRef =
+          db.doc(
+            `projects/${projectId}/floors/${floorId}`,
+          );
+
+        const floorSnapshot =
+          await floorRef.get();
+
+        if (
+          !floorSnapshot.exists
+        ) {
+          throw new HttpsError(
+            "not-found",
+            `Floor ${floorId} does not exist.`,
+          );
+        }
+
+        batch.set(
+          floorRef,
+          {
+            spacesUrl,
+            panelTestsUrl,
+            updatedBy:
+              request.auth.uid,
+            updatedAt:
+              FieldValue.serverTimestamp(),
+          },
+          {
+            merge: true,
+          },
+        );
+      }
+
+      batch.set(
+        projectRef,
+        {
+          commissioningSourcePath:
+            sourceWorkbookPath,
+          commissioningDataImported:
+            true,
+          updatedBy:
+            request.auth.uid,
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      batch.set(
+        db.collection(
+          `projects/${projectId}/auditEvents`,
+        ).doc(),
+        {
+          eventType:
+            "commissioning_data_imported",
+          sourceWorkbookPath,
+          floorCount:
+            inputFloors.length,
+          performedBy:
+            request.auth.uid,
+          createdAt:
+            FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+      return {
+        success: true,
+      };
+    },
+  );
