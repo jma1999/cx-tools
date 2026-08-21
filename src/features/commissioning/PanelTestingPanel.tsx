@@ -102,6 +102,11 @@ export default function PanelTestingPanel({
     setReferenceImageUrl,
   ] = useState("");
 
+  const [
+    referenceImageError,
+    setReferenceImageError,
+  ] = useState("");
+
   useEffect(() => {
     const savedByCircuitId = new Map(
       savedResults.map((result) => [
@@ -198,6 +203,87 @@ export default function PanelTestingPanel({
     };
   }, [
     space.referenceImagePath,
+  ]);
+
+  useEffect(() => {
+    const imageReference =
+      space.referenceImageUrl?.trim();
+
+    if (!imageReference) {
+      setReferenceImageUrl("");
+      setReferenceImageError("");
+
+      return;
+    }
+
+    let cancelled = false;
+    let objectUrl = "";
+
+    async function loadReferenceImage():
+      Promise<void> {
+      setReferenceImageUrl("");
+      setReferenceImageError("");
+
+      try {
+        const asset =
+          await loadImageAsset(
+            imageReference!,
+          );
+
+        if (cancelled) {
+          if (asset.revoke) {
+            URL.revokeObjectURL(
+              asset.url,
+            );
+          }
+
+          return;
+        }
+
+        if (asset.revoke) {
+          objectUrl =
+            asset.url;
+        }
+
+        setReferenceImageUrl(
+          asset.url,
+        );
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(
+          "Panel reference image could not be loaded:",
+          {
+            spaceId: space.id,
+            imageReference,
+            error,
+          },
+        );
+
+        setReferenceImageError(
+          error instanceof Error
+            ? error.message
+            : "Electrical plan reference could not be loaded.",
+        );
+      }
+    }
+
+    void loadReferenceImage();
+
+    return () => {
+      cancelled = true;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(
+          objectUrl,
+        );
+      }
+    };
+  }, [
+    space.id,
+    space.referenceImageUrl,
   ]);
 
   const openIssuesByCircuit =
@@ -370,7 +456,7 @@ export default function PanelTestingPanel({
         </div>
       )}
 
-      {referenceImageUrl && (
+      {space.referenceImageUrl && (
         <section className="panel-reference-section">
           <div className="inspection-group-heading">
             <h3>
@@ -378,11 +464,22 @@ export default function PanelTestingPanel({
             </h3>
           </div>
 
-          <img
-            className="panel-reference-image"
-            src={referenceImageUrl}
-            alt={`Electrical plan reference for ${space.displayName}`}
-          />
+          {referenceImageUrl ? (
+            <img
+              className="panel-reference-image"
+              src={referenceImageUrl}
+              alt={`Electrical plan reference for ${space.displayName}`}
+            />
+          ) : referenceImageError ? (
+            <div className="panel-image-error">
+              Electrical plan reference
+              could not be loaded.
+            </div>
+          ) : (
+            <div className="panel-image-loading">
+              Loading electrical plan…
+            </div>
+          )}
         </section>
       )}
 

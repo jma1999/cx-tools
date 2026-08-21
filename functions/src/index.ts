@@ -316,6 +316,75 @@ function projectSlug(
   return slug;
 }
 
+/**
+ * Validates and returns a floor ID.
+ *
+ * @param {*} value Floor ID value to validate.
+ * @return {string} Validated floor ID.
+ */
+function requireFloorId(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string"
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "A floor ID is required.",
+    );
+  }
+
+  const floorId =
+    value.trim();
+
+  if (
+    !/^[A-Za-z0-9_-]{1,20}$/.test(
+      floorId,
+    )
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Floor ID may only contain letters, numbers, hyphens and underscores.",
+    );
+  }
+
+  return floorId;
+}
+
+/**
+ * Validates and returns a floor label.
+ *
+ * @param {*} value Floor label value to validate.
+ * @return {string} Validated floor label.
+ */
+function requireFloorLabel(
+  value: unknown,
+): string {
+  if (
+    typeof value !== "string"
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "A floor label is required.",
+    );
+  }
+
+  const label =
+    value.trim();
+
+  if (
+    label.length < 1 ||
+    label.length > 80
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Floor label must be between 1 and 80 characters.",
+    );
+  }
+
+  return label;
+}
+
 export const grantProjectAccess =
   onCall(
     {
@@ -1322,6 +1391,149 @@ export const createProject =
 
           status:
             "draft",
+        },
+      };
+    },
+  );
+
+export const upsertProjectFloor =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before editing project setup.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      const floorId =
+        requireFloorId(
+          request.data?.floorId,
+        );
+
+      const label =
+        requireFloorLabel(
+          request.data?.label,
+        );
+
+      const orderValue =
+        request.data?.order;
+
+      const order =
+        typeof orderValue ===
+          "number" &&
+        Number.isFinite(orderValue) ?
+          Math.trunc(orderValue) :
+          0;
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const projectRef =
+        db.doc(
+          `projects/${projectId}`,
+        );
+
+      const projectSnapshot =
+        await projectRef.get();
+
+      if (!projectSnapshot.exists) {
+        throw new HttpsError(
+          "not-found",
+          "The selected project could not be found.",
+        );
+      }
+
+      const floorRef =
+        db.doc(
+          `projects/${projectId}/floors/${floorId}`,
+        );
+
+      const auditRef =
+        db.collection(
+          `projects/${projectId}/auditEvents`,
+        ).doc();
+
+      const batch =
+        db.batch();
+
+      batch.set(
+        floorRef,
+        {
+          label,
+          order,
+
+          /*
+           * These are populated in
+           * the next setup step.
+           */
+          spacesUrl: "",
+          regionsUrl: "",
+          panelTestsUrl: "",
+
+          updatedBy:
+            request.auth.uid,
+
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      batch.set(
+        projectRef,
+        {
+          updatedBy:
+            request.auth.uid,
+
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      batch.set(
+        auditRef,
+        {
+          eventType:
+            "project_floor_saved",
+
+          floorId,
+          floorLabel:
+            label,
+
+          performedBy:
+            request.auth.uid,
+
+          createdAt:
+            FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+
+      return {
+        floor: {
+          id:
+            floorId,
+
+          label,
+
+          order,
         },
       };
     },
