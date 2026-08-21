@@ -2768,3 +2768,28 @@ button:disabled {
       repeat(2, minmax(0, 1fr));
   }
 }
+
+.setup-import-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.import-complete-card {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #86b998;
+  border-radius: 10px;
+  background: #f7fbf8;
+}
+
+.import-complete-card strong {
+  color: #166534;
+  font-size: 13px;
+}
+
+.import-complete-card p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 11px;
+}

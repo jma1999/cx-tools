@@ -71,6 +71,12 @@ export interface AdminProjectSummary {
     | "archived";
 }
 
+export interface CommitFloorImport {
+  floorId: string;
+  spacesUrl: string;
+  panelTestsUrl: string;
+}
+
 interface GrantProjectAccessInput {
   projectId: string;
   email: string;
@@ -175,6 +181,25 @@ const listAdminProjectsCallable =
     firebaseFunctions,
     "listAdminProjects",
   );
+
+const commitCommissioningImportCallable =
+  httpsCallable<
+    {
+      projectId: string;
+
+      sourceWorkbookPath:
+        string;
+
+      floors:
+        CommitFloorImport[];
+    },
+    {
+      success: boolean;
+    }
+  >(
+    firebaseFunctions,
+    "commitCommissioningImport",
+  );
   
 export async function listProjectPeople(
   projectId: string,
@@ -258,4 +283,17 @@ export async function listAdminProjects():
     );
 
   return response.data.projects;
+}
+
+export async function commitCommissioningImport(
+  projectId: string,
+  sourceWorkbookPath: string,
+  floors:
+    CommitFloorImport[],
+): Promise<void> {
+  await commitCommissioningImportCallable({
+    projectId,
+    sourceWorkbookPath,
+    floors,
+  });
 }
