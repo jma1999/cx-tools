@@ -11928,7 +11928,7 @@
       "roomNo": "452",
       "spaceType": "Copy/Print",
       "displayName": "452 - Copy/Print",
-      "regionId": "region-050",
+      "regionId": "region-056",
       "status": "not_inspected",
       "polygon": [],
       "daylightZone": null,
@@ -11985,6 +11985,137 @@
           "category": "control",
           "deviceType": "DT-305",
           "expectedQty": 2,
+          "observedQty": null,
+          "result": "not_checked",
+          "notes": "Wattstopper occupancy sensor",
+          "locationNotes": "",
+          "tests": [
+            {
+              "id": "detection-indicators",
+              "label": "PIR and ultrasonic detection indicators respond to movement"
+            },
+            {
+              "id": "coverage",
+              "label": "Sensor detects occupancy throughout the intended coverage area"
+            },
+            {
+              "id": "occupied-response",
+              "label": "Lighting follows the approved occupied sequence",
+              "instructions": "Enter the space and verify automatic-on, partial-on or manual-on behavior matches the approved sequence of operation."
+            },
+            {
+              "id": "vacancy-response",
+              "label": "Lighting follows the approved vacancy sequence after the programmed delay",
+              "instructions": "Leave the coverage area or remain still, then verify the zone dims or switches off after the configured delay."
+            },
+            {
+              "id": "manual-override",
+              "label": "Manual controls interact correctly with occupancy control",
+              "instructions": "Operate the associated wallstation and verify manual on/off or level changes persist and reset according to the approved sequence."
+            }
+          ],
+          "issueIds": []
+        },
+        {
+          "id": "lighting-1",
+          "category": "lighting",
+          "deviceType": "A2",
+          "expectedQty": 3,
+          "observedQty": null,
+          "result": "not_checked",
+          "notes": "2x2-ft LED troffer",
+          "locationNotes": "",
+          "tests": [
+            {
+              "id": "switching",
+              "label": "Fixture switches on and off correctly",
+              "instructions": "Operate the assigned control and verify every fixture in this item turns on and off without an abnormal delay."
+            },
+            {
+              "id": "stable-output",
+              "label": "Fixture operates without flicker or unexpected shutdown",
+              "instructions": "Observe the fixture at full output and after control changes. Note delayed starting, flicker, pulsing, intermittent operation or abnormal driver noise."
+            },
+            {
+              "id": "visual-consistency",
+              "label": "Light output and color appear consistent across the fixture group",
+              "instructions": "Check for dead LEDs, dark sections, bright spots or visibly inconsistent color within fixtures of the same type."
+            },
+            {
+              "id": "physical-condition",
+              "label": "Fixture is secure, aligned and free from visible damage",
+              "instructions": "Inspect the housing, trim, lens, diffuser and visible accessories for damage, looseness, contamination or missing parts."
+            }
+          ],
+          "issueIds": []
+        }
+      ],
+      "issueIds": []
+    },
+    {
+      "id": "04-452-copy-print-083",
+      "sourceRow": 83,
+      "floor": "04",
+      "roomNo": "452",
+      "spaceType": "Copy/Print",
+      "displayName": "Copy/Print",
+      "regionId": "region-050",
+      "status": "not_inspected",
+      "polygon": [],
+      "daylightZone": null,
+      "emergencyFixtures": null,
+      "testedBy": "",
+      "testedAt": null,
+      "notes": "",
+      "items": [
+        {
+          "id": "control-1",
+          "category": "control",
+          "deviceType": "S4b",
+          "expectedQty": 1,
+          "observedQty": null,
+          "result": "not_checked",
+          "notes": "wireless wall-station dimmer",
+          "locationNotes": "",
+          "tests": [
+            {
+              "id": "on-command",
+              "label": "ON button turns the assigned lighting zone on",
+              "instructions": "Press ON once and verify the correct zone turns on to the approved level."
+            },
+            {
+              "id": "off-command",
+              "label": "OFF button turns the assigned lighting zone off",
+              "instructions": "Press OFF once and verify the correct zone turns off."
+            },
+            {
+              "id": "raise-command",
+              "label": "Raise button increases the assigned lighting level smoothly",
+              "instructions": "Press and hold RAISE and verify the correct zone increases smoothly without affecting unrelated zones."
+            },
+            {
+              "id": "lower-command",
+              "label": "Lower button decreases the assigned lighting level smoothly",
+              "instructions": "Press and hold LOWER and verify the correct zone decreases smoothly to the programmed minimum."
+            },
+            {
+              "id": "correct-load",
+              "label": "The wallstation controls only its assigned fixtures",
+              "instructions": "Operate all buttons and confirm the intended fixtures respond while adjacent zones remain unchanged."
+            },
+            {
+              "id": "labeling-condition",
+              "label": "Button engraving, wallplate and mounting are correct and undamaged",
+              "instructions": "Verify button labels match their programmed function and the station is secure, level and free from damage."
+            }
+          ],
+          "issueIds": []
+        },
+        {
+          "id": "control-2",
+          "category": "control",
+          "deviceType": "DT-305",
+          "expectedQty": 1,
           "observedQty": null,
           "result": "not_checked",
           "notes": "Wattstopper occupancy sensor",
