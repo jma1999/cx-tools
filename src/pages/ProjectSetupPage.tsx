@@ -24,6 +24,7 @@ import {
 import {
   upsertProjectFloor,
   commitCommissioningImport,
+  configureProjectSpreadsheet,
 } from "../services/projectAdmin";
 
 import type {
@@ -44,6 +45,16 @@ import {
 } from "../services/projectSetupAssets";
 
 import FloorFilesCard from "../features/projectSetup/FloorFilesCard";
+
+import {
+  connectGoogleSheets,
+  prepareCxToolsSpreadsheet,
+} from "../services/googleSheets";
+
+import type {
+  GoogleSheetSetupResult,
+  GoogleUser,
+} from "../services/googleSheets";
 
 interface SetupProject {
   id: string;
@@ -128,7 +139,7 @@ export default function ProjectSetupPage() {
   const [
     activeStep,
     setActiveStep,
-  ] = useState<2 | 3>(2);
+  ] = useState<2 | 3 | 4>(2);
 
   const [
     importingWorkbook,
@@ -140,13 +151,47 @@ export default function ProjectSetupPage() {
     setWorkbookImported,
   ] = useState(false);
 
-  async function loadSetup():
-    Promise<void> {
+  const [
+    spreadsheetReference,
+    setSpreadsheetReference,
+  ] = useState(
+    project?.spreadsheetId ??
+      "",
+  );
+  
+  const [
+    setupGoogleUser,
+    setSetupGoogleUser,
+  ] =
+    useState<GoogleUser | null>(
+      null,
+    );
+  
+  const [
+    sheetSetupResult,
+    setSheetSetupResult,
+  ] =
+    useState<GoogleSheetSetupResult | null>(
+      null,
+    );
+  
+  const [
+    preparingSheet,
+    setPreparingSheet,
+  ] =
+    useState(false);
+
+  async function loadSetup(
+    showPageLoader = true,
+  ): Promise<void> {
     if (!projectId) {
       return;
     }
 
-    setLoading(true);
+    if (showPageLoader) {
+      setLoading(true);
+    }
+
     setError("");
 
     try {
@@ -224,46 +269,46 @@ export default function ProjectSetupPage() {
             const floorData =
               floorDoc.data();
 
-            return {
-              id:
-                floorDoc.id,
-
-              label:
-                typeof floorData.label ===
+              return {
+                id:
+                  floorDoc.id,
+              
+                label:
+                  typeof floorData.label ===
                   "string"
-                  ? floorData.label
-                  : floorDoc.id,
-
-              order:
-                typeof floorData.order ===
+                    ? floorData.label
+                    : floorDoc.id,
+              
+                order:
+                  typeof floorData.order ===
                   "number"
-                  ? floorData.order
-                  : 0,
-
-              spacesUrl:
-                typeof floorData.spacesUrl ===
-                "string"
-                  ? floorData.spacesUrl
-                  : "",
-
-              regionsUrl:
-                typeof floorData.regionsUrl ===
-                "string"
-                  ? floorData.regionsUrl
-                  : "",
-
-              panelTestsUrl:
-                typeof floorData.panelTestsUrl ===
-                "string"
-                  ? floorData.panelTestsUrl
-                  : "",
-
-              planPath:
-                typeof floorData.planPath ===
-                "string"
-                  ? floorData.planPath
-                  : "",
-            };
+                    ? floorData.order
+                    : 0,
+              
+                spacesUrl:
+                  typeof floorData.spacesUrl ===
+                  "string"
+                    ? floorData.spacesUrl
+                    : "",
+              
+                regionsUrl:
+                  typeof floorData.regionsUrl ===
+                  "string"
+                    ? floorData.regionsUrl
+                    : "",
+              
+                panelTestsUrl:
+                  typeof floorData.panelTestsUrl ===
+                  "string"
+                    ? floorData.panelTestsUrl
+                    : "",
+              
+                planPath:
+                  typeof floorData.planPath ===
+                  "string"
+                    ? floorData.planPath
+                    : "",
+              };
           },
         ),
       );
@@ -274,13 +319,45 @@ export default function ProjectSetupPage() {
           : "Project setup could not be loaded.",
       );
     } finally {
-      setLoading(false);
+      if (showPageLoader) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     void loadSetup();
   }, [projectId]);
+
+  useEffect(() => {
+    if (
+      project?.spreadsheetId
+    ) {
+      setSpreadsheetReference(
+        project.spreadsheetId,
+      );
+    }
+  }, [
+    project?.spreadsheetId,
+  ]);
+
+  const projectFilesReady =
+    floors.length > 0 &&
+    floors.every(
+      (floor) =>
+        Boolean(
+          floor.spacesUrl,
+        ) &&
+        Boolean(
+          floor.panelTestsUrl,
+        ) &&
+        Boolean(
+          floor.regionsUrl,
+        ) &&
+        Boolean(
+          floor.planPath,
+        ),
+    );
 
   async function handleAddFloor():
     Promise<void> {
@@ -425,7 +502,9 @@ export default function ProjectSetupPage() {
           className={`setup-step ${
             activeStep === 3
               ? "active"
-              : ""
+              : activeStep > 3
+                ? "complete"
+                : ""
           }`}
         >
           <span>3</span>
@@ -441,7 +520,13 @@ export default function ProjectSetupPage() {
           </div>
         </div>
 
-        <div className="setup-step">
+        <div
+          className={`setup-step ${
+            activeStep === 4
+              ? "active"
+              : ""
+          }`}
+        >
           <span>4</span>
 
           <div>
@@ -450,7 +535,9 @@ export default function ProjectSetupPage() {
             </strong>
 
             <small>
-              Not configured
+              {project.spreadsheetId
+                ? "Configured"
+                : "Not configured"}
             </small>
           </div>
         </div>
@@ -1006,8 +1093,8 @@ export default function ProjectSetupPage() {
                     projectId!
                   }
                   floor={floor}
-                  onUpdated={
-                    loadSetup
+                  onUpdated={() =>
+                    loadSetup(false)
                   }
                 />
               ),
@@ -1015,6 +1102,317 @@ export default function ProjectSetupPage() {
           </div>
         </section>
       )}
+
+      {activeStep === 3 && (
+        <div className="setup-footer">
+          <span>
+            {projectFilesReady
+              ? "Project files configured"
+              : "Complete the required floor files before continuing"}
+          </span>
+
+          <button
+            type="button"
+            className="primary-button"
+            disabled={!projectFilesReady}
+            onClick={() => setActiveStep(4)}
+          >
+            Continue to Google Sheet →
+          </button>
+        </div>
+      )}
+
+      {activeStep === 4 && (
+        <>
+          <button
+            type="button"
+            className="setup-back-button"
+            onClick={() =>
+              setActiveStep(3)
+            }
+          >
+            ← Back to project files
+          </button>
+
+          <section className="admin-section">
+            <div className="admin-section-heading">
+              <div>
+                <h2>
+                  Google Sheet
+                </h2>
+
+                <p>
+                  Connect the shared Sheet
+                  where cxTools will store
+                  commissioning results,
+                  issues and activity.
+                </p>
+              </div>
+            </div>
+
+            <div className="sheet-setup-card">
+              <label>
+                <span>
+                  Google Sheet URL
+                </span>
+
+                <input
+                  type="text"
+                  value={
+                    spreadsheetReference
+                  }
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  disabled={
+                    preparingSheet
+                  }
+                  onChange={(
+                    event,
+                  ) => {
+                    setSpreadsheetReference(
+                      event.target.value,
+                    );
+
+                    setSheetSetupResult(
+                      null,
+                    );
+                  }}
+                />
+              </label>
+
+              <div className="sheet-google-account">
+                {setupGoogleUser ? (
+                  <div>
+                    <span>
+                      Connected as
+                    </span>
+
+                    <strong>
+                      {
+                        setupGoogleUser.email
+                      }
+                    </strong>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={async () => {
+                      setError("");
+
+                      try {
+                        const user =
+                          await connectGoogleSheets();
+
+                        setSetupGoogleUser(
+                          user,
+                        );
+                      } catch (err) {
+                        setError(
+                          err instanceof
+                          Error
+                            ? err.message
+                            : "Google Sheets could not be connected.",
+                        );
+                      }
+                    }}
+                  >
+                    Connect Google Sheets
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="primary-button"
+                disabled={
+                  preparingSheet ||
+                  !setupGoogleUser ||
+                  !spreadsheetReference.trim()
+                }
+                onClick={async () => {
+                  if (!projectId) {
+                    return;
+                  }
+
+                  setPreparingSheet(
+                    true,
+                  );
+
+                  setError("");
+                  setMessage("");
+                  setSheetSetupResult(
+                    null,
+                  );
+
+                  try {
+                    const result =
+                      await prepareCxToolsSpreadsheet(
+                        spreadsheetReference,
+                      );
+
+                    setSheetSetupResult(
+                      result,
+                    );
+
+                    if (
+                      result.issues
+                        .length === 0
+                    ) {
+                      await configureProjectSpreadsheet(
+                        projectId,
+                        result.spreadsheetId,
+                        result.spreadsheetTitle,
+                      );
+
+                      setMessage(
+                        "Google Sheet configured successfully.",
+                      );
+
+                      await loadSetup(
+                        false,
+                      );
+                    }
+                  } catch (err) {
+                    console.error(
+                      "Google Sheet setup failed:",
+                      err,
+                    );
+
+                    setError(
+                      err instanceof
+                      Error
+                        ? err.message
+                        : "The Google Sheet could not be prepared.",
+                    );
+                  } finally {
+                    setPreparingSheet(
+                      false,
+                    );
+                  }
+                }}
+              >
+                {preparingSheet
+                  ? "Checking & preparing…"
+                  : "Verify & prepare Sheet"}
+              </button>
+            </div>
+
+            {sheetSetupResult && (
+              <div className="sheet-validation-results">
+                <div className="sheet-summary-grid">
+                  <div>
+                    <span>
+                      Spreadsheet
+                    </span>
+
+                    <strong>
+                      {
+                        sheetSetupResult
+                          .spreadsheetTitle
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      cxTools tabs
+                    </span>
+
+                    <strong>
+                      {
+                        sheetSetupResult
+                          .readySheets
+                          .length
+                      }
+                      {" / "}
+                      {
+                        sheetSetupResult
+                          .requiredSheetCount
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Created now
+                    </span>
+
+                    <strong>
+                      {
+                        sheetSetupResult
+                          .createdSheets
+                          .length
+                      }
+                    </strong>
+                  </div>
+                </div>
+
+                {sheetSetupResult
+                  .issues.length ===
+                0 ? (
+                  <div className="admin-success-message">
+                    Google Sheet is ready
+                    for cxTools.
+                  </div>
+                ) : (
+                  <div className="import-issue-list">
+                    <strong>
+                      Sheet setup needs
+                      attention
+                    </strong>
+
+                    {sheetSetupResult
+                      .issues.map(
+                        (
+                          issue,
+                          index,
+                        ) => (
+                          <div
+                            className="import-error-row"
+                            key={`${issue.sheet}-${index}`}
+                          >
+                            <span>
+                              {
+                                issue.sheet
+                              }
+                            </span>
+
+                            <p>
+                              {
+                                issue.message
+                              }
+                            </p>
+                          </div>
+                        ),
+                      )}
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          {project.spreadsheetId &&
+            sheetSetupResult &&
+            sheetSetupResult
+              .issues.length ===
+              0 && (
+              <div className="setup-footer">
+                <span>
+                  Google Sheet configured
+                </span>
+
+                <button
+                  type="button"
+                  className="primary-button"
+                  disabled
+                >
+                  Continue to validation →
+                </button>
+              </div>
+            )}
+        </>
+      )}
+
     </main>
   );
 }

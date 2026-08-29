@@ -1952,3 +1952,138 @@ export const commitProjectFloorAssets =
       };
     },
   );
+
+export const configureProjectSpreadsheet =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before configuring the project spreadsheet.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data
+            ?.projectId,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const spreadsheetId =
+        typeof request.data
+          ?.spreadsheetId ===
+        "string" ?
+          request.data
+            .spreadsheetId
+            .trim() :
+          "";
+
+      const spreadsheetName =
+        typeof request.data
+          ?.spreadsheetName ===
+        "string" ?
+          request.data
+            .spreadsheetName
+            .trim()
+            .slice(
+              0,
+              200,
+            ) :
+          "";
+
+      if (
+        !/^[a-zA-Z0-9-_]{20,}$/.test(
+          spreadsheetId,
+        )
+      ) {
+        throw new HttpsError(
+          "invalid-argument",
+          "The Google spreadsheet ID is invalid.",
+        );
+      }
+
+      const projectRef =
+        db.doc(
+          `projects/${projectId}`,
+        );
+
+      const snapshot =
+        await projectRef.get();
+
+      if (!snapshot.exists) {
+        throw new HttpsError(
+          "not-found",
+          "The project could not be found.",
+        );
+      }
+
+      if (
+        snapshot.data()
+          ?.status !==
+        "draft"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Spreadsheet setup can only be changed for draft projects.",
+        );
+      }
+
+      const batch =
+        db.batch();
+
+      batch.set(
+        projectRef,
+        {
+          spreadsheetId,
+
+          spreadsheetName,
+
+          googleSheetConfigured:
+            true,
+
+          updatedBy:
+            request.auth.uid,
+
+          updatedAt:
+            FieldValue.serverTimestamp(),
+        },
+        {
+          merge: true,
+        },
+      );
+
+      batch.set(
+        db.collection(
+          `projects/${projectId}/auditEvents`,
+        ).doc(),
+        {
+          eventType:
+            "project_spreadsheet_configured",
+
+          spreadsheetId,
+
+          spreadsheetName,
+
+          performedBy:
+            request.auth.uid,
+
+          createdAt:
+            FieldValue.serverTimestamp(),
+        },
+      );
+
+      await batch.commit();
+
+      return {
+        success: true,
+      };
+    },
+  );
