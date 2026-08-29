@@ -222,6 +222,39 @@ const commitProjectFloorAssetsCallable =
     "commitProjectFloorAssets",
   );
 
+  const configureProjectSpreadsheetCallable =
+  httpsCallable<
+    {
+      projectId:
+        string;
+
+      spreadsheetId:
+        string;
+
+      spreadsheetName:
+        string;
+    },
+    {
+      success:
+        boolean;
+    }
+  >(
+    firebaseFunctions,
+    "configureProjectSpreadsheet",
+  );
+
+export async function configureProjectSpreadsheet(
+  projectId: string,
+  spreadsheetId: string,
+  spreadsheetName: string,
+): Promise<void> {
+  await configureProjectSpreadsheetCallable({
+    projectId,
+    spreadsheetId,
+    spreadsheetName,
+  });
+}
+
 export async function listProjectPeople(
   projectId: string,
 ): Promise<ProjectPeople> {

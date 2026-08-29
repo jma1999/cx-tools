@@ -11,6 +11,160 @@ const GOOGLE_SCOPE = [SHEETS_SCOPE, EMAIL_SCOPE].join(" ");
 const SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 const USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
+const CXTOOLS_REQUIRED_SHEETS:
+  RequiredSheetDefinition[] = [
+  {
+    title:
+      "RegionAssignments",
+
+    headers: [
+      "Floor",
+      "RegionId",
+      "RegionLabel",
+      "SpaceId",
+      "RoomNo",
+      "SpaceType",
+      "UpdatedBy",
+      "UpdatedAt",
+      "Revision",
+    ],
+  },
+
+  {
+    title:
+      "Comments",
+
+    headers: [
+      "CommentId",
+      "Floor",
+      "RegionId",
+      "SpaceId",
+      "RoomNo",
+      "Comment",
+      "CreatedBy",
+      "CreatedAt",
+      "Category",
+    ],
+  },
+
+  {
+    title:
+      "ChecklistResults",
+
+    headers: [
+      "Floor",
+      "SpaceId",
+      "ChecklistItemId",
+      "DeviceType",
+      "ExpectedQty",
+      "ObservedQty",
+      "Result",
+      "Notes",
+      "UpdatedBy",
+      "UpdatedAt",
+      "Revision",
+    ],
+  },
+
+  {
+    title:
+      "TestResults",
+
+    headers: [
+      "Floor",
+      "SpaceId",
+      "ChecklistItemId",
+      "TestId",
+      "DeviceType",
+      "TestLabel",
+      "Result",
+      "Notes",
+      "UpdatedBy",
+      "UpdatedAt",
+      "Revision",
+    ],
+  },
+
+  {
+    title:
+      "Issues",
+
+    headers: [
+      "IssueId",
+      "Floor",
+      "RegionId",
+      "SpaceId",
+      "RoomNo",
+      "ChecklistItemId",
+      "IssueDescription",
+      "Status",
+      "CreatedBy",
+      "CreatedAt",
+      "ResolvedBy",
+      "ResolvedAt",
+    ],
+  },
+
+  {
+    title:
+      "PanelTestResults",
+
+    headers: [
+      "Floor",
+      "SpaceId",
+      "RoomNo",
+      "RegionId",
+      "Panelboard",
+      "CircuitId",
+      "CircuitNo",
+      "LoadDescription",
+      "Result",
+      "Notes",
+      "UpdatedBy",
+      "UpdatedAt",
+      "Revision",
+    ],
+  },
+
+  {
+    title:
+      "PanelIssues",
+
+    headers: [
+      "IssueId",
+      "Floor",
+      "SpaceId",
+      "RoomNo",
+      "RegionId",
+      "Panelboard",
+      "CircuitId",
+      "CircuitNo",
+      "IssueDescription",
+      "Status",
+      "CreatedBy",
+      "CreatedAt",
+      "ResolvedBy",
+      "ResolvedAt",
+    ],
+  },
+
+  {
+    title:
+      "ActivityLog",
+
+    headers: [
+      "EventId",
+      "EventType",
+      "Floor",
+      "RegionId",
+      "SpaceId",
+      "User",
+      "CreatedAt",
+      "Payload",
+    ],
+  },
+];
+
 let tokenClient: GoogleTokenClient | null = null;
 let accessToken: string | null = null;
 let tokenExpiresAt = 0;
@@ -218,6 +372,20 @@ export interface CommissioningRepository {
   ): Promise<SheetPanelIssue>;
 }
 
+export interface GoogleSheetSetupIssue {
+  sheet: string;
+  message: string;
+}
+
+export interface GoogleSheetSetupResult {
+  spreadsheetId: string;
+  spreadsheetTitle: string;
+  requiredSheetCount: number;
+  createdSheets: string[];
+  readySheets: string[];
+  issues: GoogleSheetSetupIssue[];
+}
+
 interface ValueRangeResponse {
   range?: string;
   majorDimension?: string;
@@ -227,6 +395,24 @@ interface ValueRangeResponse {
 interface BatchUpdateData {
   range: string;
   values: Array<Array<string | number | boolean>>;
+}
+
+interface RequiredSheetDefinition {
+  title: string;
+  headers: string[];
+}
+
+interface SpreadsheetMetadata {
+  properties?: {
+    title?: string;
+  };
+
+  sheets?: Array<{
+    properties?: {
+      sheetId?: number;
+      title?: string;
+    };
+  }>;
 }
 
 function requireClientId(): string {
@@ -581,6 +767,32 @@ function checklistResultValue(value: unknown): ChecklistResult {
   }
 
   return "not_checked";
+}
+
+function columnLetter(
+  columnCount: number,
+): string {
+  let value =
+    columnCount;
+
+  let result = "";
+
+  while (value > 0) {
+    const remainder =
+      (value - 1) % 26;
+
+    result =
+      String.fromCharCode(
+        65 + remainder,
+      ) + result;
+
+    value =
+      Math.floor(
+        (value - 1) / 26,
+      );
+  }
+
+  return result;
 }
 
 export async function loadAssignments(
@@ -1772,5 +1984,241 @@ export function createGoogleSheetsRepository(
           resolvedBy,
           resolvedSpreadsheetId,
         ),
+  };
+}
+
+export function extractSpreadsheetId(
+  value: string,
+): string {
+  const trimmed =
+    value.trim();
+
+  if (!trimmed) {
+    throw new Error(
+      "Enter a Google Sheet URL.",
+    );
+  }
+
+  /*
+   * Normal Google Sheets URL:
+   *
+   * https://docs.google.com/
+   * spreadsheets/d/SPREADSHEET_ID/edit
+   */
+  const urlMatch =
+    trimmed.match(
+      /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/,
+    );
+
+  if (urlMatch?.[1]) {
+    return urlMatch[1];
+  }
+
+  /*
+   * Also allow somebody to paste
+   * only the spreadsheet ID.
+   */
+  if (
+    /^[a-zA-Z0-9-_]{20,}$/.test(
+      trimmed,
+    )
+  ) {
+    return trimmed;
+  }
+
+  throw new Error(
+    "This does not look like a valid Google Sheet URL or spreadsheet ID.",
+  );
+}
+
+export async function prepareCxToolsSpreadsheet(
+  spreadsheetReference: string,
+): Promise<GoogleSheetSetupResult> {
+  const spreadsheetId =
+    extractSpreadsheetId(
+      spreadsheetReference,
+    );
+
+  /*
+   * This also proves the connected
+   * Google account can access the
+   * spreadsheet.
+   */
+  const metadata =
+    await authenticatedFetch<
+      SpreadsheetMetadata
+    >(
+      `${SHEETS_API_BASE}/${spreadsheetId}?fields=properties.title,sheets.properties(sheetId,title)`,
+    );
+
+  const existingTitles =
+    new Set(
+      (
+        metadata.sheets ??
+        []
+      )
+        .map(
+          (sheet) =>
+            sheet.properties
+              ?.title,
+        )
+        .filter(
+          (
+            title,
+          ): title is string =>
+            Boolean(title),
+        ),
+    );
+
+  const missingSheets =
+    CXTOOLS_REQUIRED_SHEETS
+      .filter(
+        (definition) =>
+          !existingTitles.has(
+            definition.title,
+          ),
+      );
+
+  /*
+   * Create missing tabs.
+   */
+  if (
+    missingSheets.length >
+    0
+  ) {
+    await authenticatedFetch(
+      `${SHEETS_API_BASE}/${spreadsheetId}:batchUpdate`,
+      {
+        method:
+          "POST",
+
+        body:
+          JSON.stringify({
+            requests:
+              missingSheets.map(
+                (definition) => ({
+                  addSheet: {
+                    properties: {
+                      title:
+                        definition.title,
+                    },
+                  },
+                }),
+              ),
+          }),
+      },
+    );
+  }
+
+  const createdSheets =
+    missingSheets.map(
+      (definition) =>
+        definition.title,
+    );
+
+  const readySheets:
+    string[] = [];
+
+  const issues:
+    GoogleSheetSetupIssue[] =
+    [];
+
+  /*
+   * Validate / initialize every
+   * required header row.
+   */
+  for (
+    const definition of
+    CXTOOLS_REQUIRED_SHEETS
+  ) {
+    const response =
+      await getValues(
+        `${definition.title}!1:1`,
+        spreadsheetId,
+      );
+
+    const currentHeaders =
+      (
+        response.values?.[0] ??
+        []
+      ).map(
+        (value) =>
+          String(
+            value ?? "",
+          ).trim(),
+      );
+
+    const sheetIsBlank =
+      currentHeaders.every(
+        (value) =>
+          !value,
+      );
+
+    if (sheetIsBlank) {
+      await updateValues(
+        `${definition.title}!A1:${columnLetter(
+          definition.headers.length,
+        )}1`,
+        [
+          definition.headers,
+        ],
+        spreadsheetId,
+      );
+
+      readySheets.push(
+        definition.title,
+      );
+
+      continue;
+    }
+
+    const expected =
+      definition.headers;
+
+    const headersMatch =
+      expected.every(
+        (
+          expectedHeader,
+          index,
+        ) =>
+          currentHeaders[
+            index
+          ] ===
+          expectedHeader,
+      );
+
+    if (!headersMatch) {
+      issues.push({
+        sheet:
+          definition.title,
+
+        message:
+          "This tab already contains columns that do not match the cxTools schema. Nothing was overwritten.",
+      });
+
+      continue;
+    }
+
+    readySheets.push(
+      definition.title,
+    );
+  }
+
+  return {
+    spreadsheetId,
+
+    spreadsheetTitle:
+      metadata.properties
+        ?.title ??
+      "Google Sheet",
+
+    requiredSheetCount:
+      CXTOOLS_REQUIRED_SHEETS.length,
+
+    createdSheets,
+
+    readySheets,
+
+    issues,
   };
 }
