@@ -2222,3 +2222,130 @@ export async function prepareCxToolsSpreadsheet(
     issues,
   };
 }
+
+export async function validateCxToolsSpreadsheet(
+  spreadsheetReference: string,
+): Promise<GoogleSheetSetupResult> {
+  const spreadsheetId =
+    extractSpreadsheetId(
+      spreadsheetReference,
+    );
+
+  const metadata =
+    await authenticatedFetch<
+      SpreadsheetMetadata
+    >(
+      `${SHEETS_API_BASE}/${spreadsheetId}?fields=properties.title,sheets.properties(sheetId,title)`,
+    );
+
+  const sheetTitles =
+    new Set(
+      (
+        metadata.sheets ??
+        []
+      )
+        .map(
+          (sheet) =>
+            sheet.properties
+              ?.title,
+        )
+        .filter(
+          (
+            title,
+          ): title is string =>
+            Boolean(title),
+        ),
+    );
+
+  const readySheets:
+    string[] = [];
+
+  const issues:
+    GoogleSheetSetupIssue[] =
+    [];
+
+  for (
+    const definition of
+    CXTOOLS_REQUIRED_SHEETS
+  ) {
+    if (
+      !sheetTitles.has(
+        definition.title,
+      )
+    ) {
+      issues.push({
+        sheet:
+          definition.title,
+
+        message:
+          "Required cxTools tab is missing.",
+      });
+
+      continue;
+    }
+
+    const response =
+      await getValues(
+        `${definition.title}!1:1`,
+        spreadsheetId,
+      );
+
+    const currentHeaders =
+      (
+        response.values?.[0] ??
+        []
+      ).map(
+        (value) =>
+          String(
+            value ?? "",
+          ).trim(),
+      );
+
+    const valid =
+      definition.headers
+        .every(
+          (
+            expected,
+            index,
+          ) =>
+            currentHeaders[
+              index
+            ] ===
+            expected,
+        );
+
+    if (!valid) {
+      issues.push({
+        sheet:
+          definition.title,
+
+        message:
+          "Header structure does not match the cxTools schema.",
+      });
+
+      continue;
+    }
+
+    readySheets.push(
+      definition.title,
+    );
+  }
+
+  return {
+    spreadsheetId,
+
+    spreadsheetTitle:
+      metadata.properties
+        ?.title ??
+      "Google Sheet",
+
+    requiredSheetCount:
+      CXTOOLS_REQUIRED_SHEETS.length,
+
+    createdSheets: [],
+
+    readySheets,
+
+    issues,
+  };
+}

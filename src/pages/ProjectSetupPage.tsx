@@ -25,10 +25,12 @@ import {
   upsertProjectFloor,
   commitCommissioningImport,
   configureProjectSpreadsheet,
+  validateProjectSetup,
 } from "../services/projectAdmin";
 
 import type {
   ProjectSetupFloor,
+  ProjectValidationResult,
 } from "../services/projectAdmin";
 
 import {
@@ -49,6 +51,7 @@ import FloorFilesCard from "../features/projectSetup/FloorFilesCard";
 import {
   connectGoogleSheets,
   prepareCxToolsSpreadsheet,
+  validateCxToolsSpreadsheet,
 } from "../services/googleSheets";
 
 import type {
@@ -63,6 +66,7 @@ interface SetupProject {
   description: string;
   spreadsheetId: string;
   status: string;
+  googleSheetConfigured: boolean;
 }
 
 export default function ProjectSetupPage() {
@@ -139,7 +143,7 @@ export default function ProjectSetupPage() {
   const [
     activeStep,
     setActiveStep,
-  ] = useState<2 | 3 | 4>(2);
+  ] = useState<2 | 3 | 4 | 5>(2);
 
   const [
     importingWorkbook,
@@ -178,6 +182,28 @@ export default function ProjectSetupPage() {
   const [
     preparingSheet,
     setPreparingSheet,
+  ] =
+    useState(false);
+
+  const [
+    validationResult,
+    setValidationResult,
+  ] =      
+    useState<ProjectValidationResult | null>(
+      null,
+    );
+    
+  const [
+    validationSheetResult,
+    setValidationSheetResult,
+  ] =
+    useState<GoogleSheetSetupResult | null>(
+      null,
+    );
+    
+  const [
+    runningValidation,
+    setRunningValidation,
   ] =
     useState(false);
 
@@ -248,6 +274,10 @@ export default function ProjectSetupPage() {
             "string"
             ? data.status
             : "draft",
+        
+        googleSheetConfigured:
+          data.googleSheetConfigured ===
+          true,
       });
 
       const floorSnapshot =
@@ -357,6 +387,24 @@ export default function ProjectSetupPage() {
         Boolean(
           floor.planPath,
         ),
+    );
+  
+  const googleSheetValid =
+    Boolean(
+      validationSheetResult &&
+      validationSheetResult
+        .issues.length === 0 &&
+      validationSheetResult
+        .readySheets.length ===
+        validationSheetResult
+          .requiredSheetCount,
+    );
+  
+  const projectReadyForPublish =
+    Boolean(
+      validationResult
+        ?.readyForPublish &&
+      googleSheetValid,
     );
 
   async function handleAddFloor():
@@ -521,11 +569,15 @@ export default function ProjectSetupPage() {
         </div>
 
         <div
-          className={`setup-step ${
-            activeStep === 4
-              ? "active"
-              : ""
-          }`}
+          className={
+            `setup-step ${
+              activeStep === 4
+                ? "active"
+                : activeStep > 4
+                  ? "complete"
+                  : ""
+            }`
+          }
         >
           <span>4</span>
 
@@ -542,7 +594,15 @@ export default function ProjectSetupPage() {
           </div>
         </div>
 
-        <div className="setup-step">
+        <div 
+          className={
+            `setup-step ${
+              activeStep === 5
+                ? "active"
+                : ""
+            }`
+          }
+        >
           <span>5</span>
 
           <div>
@@ -551,7 +611,7 @@ export default function ProjectSetupPage() {
             </strong>
 
             <small>
-              Pending
+              Run checks
             </small>
           </div>
         </div>
@@ -1404,12 +1464,320 @@ export default function ProjectSetupPage() {
                 <button
                   type="button"
                   className="primary-button"
-                  disabled
+                  disabled={
+                    !project.googleSheetConfigured ||
+                    !project.spreadsheetId
+                  }
+                  onClick={() =>
+                    setActiveStep(5)
+                  }
                 >
                   Continue to validation →
                 </button>
               </div>
             )}
+        </>
+      )}
+
+      {activeStep === 5 && (
+        <>
+          <button
+            type="button"
+            className="setup-back-button"
+            onClick={() =>
+              setActiveStep(4)
+            }
+          >
+            ← Back to Google Sheet
+          </button>
+
+          <section className="admin-section">
+            <div className="admin-section-heading">
+              <div>
+                <h2>
+                  Validate project
+                </h2>
+
+                <p>
+                  cxTools will check the
+                  complete project before
+                  it can be published.
+                </p>
+              </div>
+            </div>
+
+            <div className="validation-intro-card">
+              <div>
+                <strong>
+                  Pre-publish checks
+                </strong>
+
+                <p>
+                  Files, floor mappings,
+                  commissioning data,
+                  panel references and the
+                  shared Google Sheet will
+                  all be verified.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="primary-button"
+                disabled={
+                  runningValidation
+                }
+                onClick={async () => {
+                  if (
+                    !projectId ||
+                    !project
+                      .spreadsheetId
+                  ) {
+                    return;
+                  }
+
+                  setRunningValidation(
+                    true,
+                  );
+
+                  setError("");
+                  setMessage("");
+
+                  try {
+                    let googleUser =
+                      setupGoogleUser;
+
+                    if (
+                      !googleUser
+                    ) {
+                      googleUser =
+                        await connectGoogleSheets();
+
+                      setSetupGoogleUser(
+                        googleUser,
+                      );
+                    }
+
+                    const [
+                      projectResult,
+                      sheetResult,
+                    ] =
+                      await Promise.all([
+                        validateProjectSetup(
+                          projectId,
+                        ),
+
+                        validateCxToolsSpreadsheet(
+                          project
+                            .spreadsheetId,
+                        ),
+                      ]);
+
+                    setValidationResult(
+                      projectResult,
+                    );
+
+                    setValidationSheetResult(
+                      sheetResult,
+                    );
+
+                    if (
+                      projectResult
+                        .readyForPublish &&
+                      sheetResult
+                        .issues.length ===
+                        0
+                    ) {
+                      setMessage(
+                        "Project passed all pre-publish checks.",
+                      );
+                    }
+                  } catch (err) {
+                    console.error(
+                      "Project validation failed:",
+                      err,
+                    );
+
+                    setError(
+                      err instanceof
+                      Error
+                        ? err.message
+                        : "Project validation could not be completed.",
+                    );
+                  } finally {
+                    setRunningValidation(
+                      false,
+                    );
+                  }
+                }}
+              >
+                {runningValidation
+                  ? "Running checks…"
+                  : "Run full validation"}
+              </button>
+            </div>
+
+            {validationResult && (
+              <div className="project-validation-results">
+                <div className="validation-summary-grid">
+                  <div>
+                    <span>
+                      Status
+                    </span>
+
+                    <strong>
+                      {projectReadyForPublish
+                        ? "Ready"
+                        : "Needs attention"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Blockers
+                    </span>
+
+                    <strong>
+                      {
+                        validationResult
+                          .blockerCount +
+                        (
+                          validationSheetResult
+                            ?.issues.length ??
+                          0
+                        )
+                      }
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>
+                      Warnings
+                    </span>
+
+                    <strong>
+                      {
+                        validationResult
+                          .warningCount
+                      }
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="validation-check-list">
+                  {validationResult
+                    .checks.map(
+                      (check) => (
+                        <div
+                          key={
+                            check.id
+                          }
+                          className={
+                            `validation-check validation-${check.status}`
+                          }
+                        >
+                          <span className="validation-check-icon">
+                            {check.status ===
+                            "pass"
+                              ? "✓"
+                              : check.status ===
+                                  "warning"
+                                ? "!"
+                                : "×"}
+                          </span>
+
+                          <div>
+                            <strong>
+                              {
+                                check.label
+                              }
+                            </strong>
+
+                            <p>
+                              {
+                                check.message
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      ),
+                    )}
+
+                  {validationSheetResult
+                    ?.issues.map(
+                      (
+                        issue,
+                        index,
+                      ) => (
+                        <div
+                          key={
+                            `${issue.sheet}-${index}`
+                          }
+                          className="validation-check validation-error"
+                        >
+                          <span className="validation-check-icon">
+                            ×
+                          </span>
+
+                          <div>
+                            <strong>
+                              Google Sheet ·{" "}
+                              {
+                                issue.sheet
+                              }
+                            </strong>
+
+                            <p>
+                              {
+                                issue.message
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      ),
+                    )}
+
+                  {googleSheetValid && (
+                    <div className="validation-check validation-pass">
+                      <span className="validation-check-icon">
+                        ✓
+                      </span>
+
+                      <div>
+                        <strong>
+                          Google Sheet
+                        </strong>
+
+                        <p>
+                          All required
+                          cxTools tabs and
+                          headers are ready.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {validationResult && (
+            <div className="setup-footer">
+              <span>
+                {projectReadyForPublish
+                  ? "All required checks passed"
+                  : "Resolve the blockers above before publishing"}
+              </span>
+
+              <button
+                type="button"
+                className="primary-button"
+                disabled
+              >
+                Continue to publish →
+              </button>
+            </div>
+          )}
         </>
       )}
 

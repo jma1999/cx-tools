@@ -40,7 +40,7 @@ import {
 } from "../../services/projectAssets";
 
 type AppMode = "assign" | "inspect" | "testing" | "panel-testing";
-export type FloorId = "03" | "04";
+export type FloorId = string;
 type SyncStatus =
   | "disconnected"
   | "loading"
@@ -655,6 +655,8 @@ export default function FloorPlan({
   ]);    
 
   useEffect(() => {
+    let cancelled = false;
+    let planObjectUrl = "";
     async function loadData(): Promise<void> {
       setLoadError("");
       setSelectedRegionId("");
@@ -665,19 +667,30 @@ export default function FloorPlan({
       setSheetIssues([]);
       setPanelTestResults([]);
       setPanelIssues([]);
+      setPanelTestData(null);
+      setPlanImageUrl("");
 
       try {
         const [
           loadedFloorData,
           loadedRegionData,
+          loadedPanelTestData,
         ] = await Promise.all([
           loadJsonAsset<FloorData>(
             floorDataUrl,
           ),
-
+        
           loadJsonAsset<RegionData>(
             regionDataUrl,
           ),
+        
+          panelTestsUrl
+            ? loadJsonAsset<PanelTestData>(
+                panelTestsUrl,
+              )
+            : Promise.resolve(
+                null,
+              ),
         ]);
 
         if (
@@ -686,7 +699,43 @@ export default function FloorPlan({
         ) {
           throw new Error(`The Floor ${floor} files contain the wrong floor ID.`);
         }
+        if (
+          loadedPanelTestData &&
+          loadedPanelTestData.floor !== floor
+        ) {
+          throw new Error(`The Floor ${floor} panel testing data contains the wrong floor ID.`);
+        }
 
+        const loadedPlan =
+          await loadImageAsset(
+            loadedRegionData.sourcePlan,
+          );
+
+        if (cancelled) {
+          if (
+            loadedPlan.revoke
+          ) {
+            URL.revokeObjectURL(
+              loadedPlan.url,
+            );
+          }
+
+          return;
+        }
+
+        setPanelTestData(loadedPanelTestData);
+
+        if (
+          loadedPlan.revoke
+        ) {
+          planObjectUrl =
+            loadedPlan.url;
+        }
+
+        setPlanImageUrl(
+          loadedPlan.url,
+        );
+        
         const validRegionIds = new Set(
           loadedRegionData.regions.map((region) => region.id),
         );
@@ -740,6 +789,10 @@ export default function FloorPlan({
             ),
         });
       } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
         setLoadError(
           error instanceof Error
             ? error.message
@@ -748,57 +801,16 @@ export default function FloorPlan({
       }
     }
 
-    void loadData();
-  }, [floor, floorDataUrl, regionDataUrl]);
+  void loadData();
 
-  useEffect(() => {
-    if (!panelTestsUrl) {
-      setPanelTestData(null);
-      return;
+  return () => {
+    cancelled = true;
+
+    if (planObjectUrl) {
+      URL.revokeObjectURL(planObjectUrl);
     }
-
-    let cancelled = false;
-
-    async function loadPanelTestData(): Promise<void> {
-      try {
-        const data =
-          await loadJsonAsset<PanelTestData>(
-            panelTestsUrl,
-          );
-
-        if (data.floor !== floor) {
-          throw new Error(
-            `The panel testing JSON contains Floor ${data.floor}, but Floor ${floor} is currently open.`,
-          );
-        }
-
-        if (!cancelled) {
-          setPanelTestData(data);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setPanelTestData(null);
-
-          setSyncStatus("error");
-
-          setSyncMessage(
-            error instanceof Error
-              ? error.message
-              : "Panel testing data could not be loaded.",
-          );
-        }
-      }
-    }
-
-    void loadPanelTestData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    floor,
-    panelTestsUrl,
-  ]);
+  };
+}, [floor, floorDataUrl, regionDataUrl, panelTestsUrl]);
 
   useEffect(() => {
     if (!googleUser || !regionData || !floorData) {
@@ -1076,65 +1088,6 @@ export default function FloorPlan({
       cancelled = true;
     };
   }, [floor, googleUser, selectedRegionId, repository]);
-
-  useEffect(() => {
-    if (!regionData?.sourcePlan) {
-      setPlanImageUrl("");
-      return;
-    }
-
-    let cancelled = false;
-    let objectUrl = "";
-
-    async function loadPlan(): Promise<void> {
-      try {
-        const asset =
-          await loadImageAsset(
-            regionData!.sourcePlan,
-          );
-
-        if (cancelled) {
-          if (asset.revoke) {
-            URL.revokeObjectURL(
-              asset.url,
-            );
-          }
-
-          return;
-        }
-
-        objectUrl = asset.revoke
-          ? asset.url
-          : "";
-
-        setPlanImageUrl(
-          asset.url,
-        );
-      } catch (error) {
-        if (!cancelled) {
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : "The floor plan image could not be loaded.",
-          );
-        }
-      }
-    }
-
-    void loadPlan();
-
-    return () => {
-      cancelled = true;
-
-      if (objectUrl) {
-        URL.revokeObjectURL(
-          objectUrl,
-        );
-      }
-    };
-  }, [
-    regionData?.sourcePlan,
-  ]);
 
   function requirePermission(
     allowed: boolean,
