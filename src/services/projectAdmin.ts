@@ -11,6 +11,11 @@ export type ProjectRole =
   | "editor"
   | "viewer";
 
+export type ProjectValidationStatus = 
+  | "pass"
+  | "warning"
+  | "error";
+
 export interface ProjectMember {
   uid: string;
   email: string;
@@ -81,6 +86,23 @@ export interface CommitFloorImport {
   spacesUrl: string;
   panelTestsUrl: string;
 }
+
+export interface ProjectValidationCheck {
+  id: string;
+  category: string;
+  label: string;
+  status: ProjectValidationStatus;
+  message: string;
+  floorId?: string;
+}
+
+export interface ProjectValidationResult {
+  readyForPublish: boolean;
+  blockerCount: number;
+  warningCount: number;
+  checks: ProjectValidationCheck[];
+}
+
 
 interface GrantProjectAccessInput {
   projectId: string;
@@ -222,7 +244,7 @@ const commitProjectFloorAssetsCallable =
     "commitProjectFloorAssets",
   );
 
-  const configureProjectSpreadsheetCallable =
+const configureProjectSpreadsheetCallable =
   httpsCallable<
     {
       projectId:
@@ -241,6 +263,18 @@ const commitProjectFloorAssetsCallable =
   >(
     firebaseFunctions,
     "configureProjectSpreadsheet",
+  );
+
+const validateProjectSetupCallable =
+  httpsCallable<
+    {
+      projectId:
+        string;
+    },
+    ProjectValidationResult
+  >(
+    firebaseFunctions,
+    "validateProjectSetup",
   );
 
 export async function configureProjectSpreadsheet(
@@ -364,4 +398,15 @@ export async function commitProjectFloorAssets(
     planPath,
     regionsUrl,
   });
+}
+
+export async function validateProjectSetup(
+  projectId: string,
+): Promise<ProjectValidationResult> {
+  const response =
+    await validateProjectSetupCallable({
+      projectId,
+    });
+
+  return response.data;
 }

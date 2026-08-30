@@ -32,6 +32,10 @@ import {
   createHash,
 } from "node:crypto";
 
+import {
+  getStorage,
+} from "firebase-admin/storage";
+
 initializeApp();
 
 const db = getFirestore();
@@ -45,6 +49,20 @@ type ProjectStatus =
   | "draft"
   | "active"
   | "archived";
+
+type SetupValidationStatus =
+  | "pass"
+  | "warning"
+  | "error";
+
+interface SetupValidationCheck {
+  id: string;
+  category: string;
+  label: string;
+  status: SetupValidationStatus;
+  message: string;
+  floorId?: string;
+}
 
 const VALID_ROLES =
   new Set<ProjectRole>([
@@ -150,6 +168,23 @@ function emailHash(
 }
 
 /**
+ * Adds a validation check to the list.
+ *
+ * @param {SetupValidationCheck[]} checks Validation checks.
+ * @param {SetupValidationCheck} input Validation check to add.
+ */
+function validationCheck(
+  checks:
+    SetupValidationCheck[],
+  input:
+    SetupValidationCheck,
+): void {
+  checks.push(
+    input,
+  );
+}
+
+/**
  * Requires an active administrator membership for a project.
  *
  * @param {string} uid Firebase Auth user ID.
@@ -222,6 +257,741 @@ async function requireSystemAdmin(
       "Only cxTools administrators can create projects.",
     );
   }
+}
+
+/**
+ * Checks whether a file exists in Storage.
+ *
+ * @param {string} path Storage file path.
+ * @return {Promise<boolean>} Whether the file exists.
+ */
+async function storageFileExists(
+  path: string,
+): Promise<boolean> {
+  if (!path) {
+    return false;
+  }
+
+  const [
+    exists,
+  ] =
+    await getStorage()
+      .bucket()
+      .file(path)
+      .exists();
+
+  return exists;
+}
+
+/**
+ * Reads JSON data from Storage.
+ *
+ * @param {string} path Storage file path.
+ * @return {Promise<unknown>} Parsed JSON data.
+ */
+async function readStorageJson(
+  path: string,
+): Promise<unknown> {
+  const [
+    buffer,
+  ] =
+    await getStorage()
+      .bucket()
+      .file(path)
+      .download();
+
+  return JSON.parse(
+    buffer.toString(
+      "utf8",
+    ),
+  );
+}
+
+/**
+ * Validates project setup.
+ *
+ * @param {string} projectId Project ID.
+ * @return {Promise<object>} Validation result.
+ */
+async function validateProjectSetupInternal(
+  projectId: string,
+): Promise<{
+  readyForPublish:
+    boolean;
+
+  blockerCount:
+    number;
+
+  warningCount:
+    number;
+
+  checks:
+    SetupValidationCheck[];
+}> {
+  const checks:
+    SetupValidationCheck[] =
+    [];
+
+  const projectRef =
+    db.doc(
+      `projects/${projectId}`,
+    );
+
+  const projectSnapshot =
+    await projectRef.get();
+
+  if (
+    !projectSnapshot.exists
+  ) {
+    throw new HttpsError(
+      "not-found",
+      "The project could not be found.",
+    );
+  }
+
+  const project =
+    projectSnapshot.data()!;
+
+  validationCheck(
+    checks,
+    {
+      id:
+        "project-name",
+
+      category:
+        "Project",
+
+      label:
+        "Project details",
+
+      status:
+        typeof project.name ===
+          "string" &&
+        project.name.trim() ?
+          "pass" :
+          "error",
+
+      message:
+        typeof project.name ===
+          "string" &&
+        project.name.trim() ?
+          "Project details are present." :
+          "Project name is missing.",
+    },
+  );
+
+  validationCheck(
+    checks,
+    {
+      id:
+        "commissioning-import",
+
+      category:
+        "Project files",
+
+      label:
+        "Commissioning data",
+
+      status:
+        project
+          .commissioningDataImported ===
+        true ?
+          "pass" :
+          "error",
+
+      message:
+        project
+          .commissioningDataImported ===
+        true ?
+          "Commissioning workbook has been imported." :
+          "Commissioning workbook has not been imported.",
+    },
+  );
+
+  validationCheck(
+    checks,
+    {
+      id:
+        "google-sheet",
+
+      category:
+        "Google Sheet",
+
+      label:
+        "Google Sheet configuration",
+
+      status:
+        project
+          .googleSheetConfigured ===
+          true &&
+        typeof project
+          .spreadsheetId ===
+          "string" &&
+        Boolean(
+          project
+            .spreadsheetId
+            .trim(),
+        ) ?
+          "pass" :
+          "error",
+
+      message:
+        project
+          .googleSheetConfigured ===
+        true ?
+          "Google Sheet is configured." :
+          "Google Sheet has not been configured.",
+    },
+  );
+
+  const floorSnapshot =
+    await db
+      .collection(
+        `projects/${projectId}/floors`,
+      )
+      .get();
+
+  if (
+    floorSnapshot.empty
+  ) {
+    validationCheck(
+      checks,
+      {
+        id:
+          "floors",
+
+        category:
+          "Floors",
+
+        label:
+          "Project floors",
+
+        status:
+          "error",
+
+        message:
+          "The project has no floors.",
+      },
+    );
+  } else {
+    validationCheck(
+      checks,
+      {
+        id:
+          "floors",
+
+        category:
+          "Floors",
+
+        label:
+          "Project floors",
+
+        status:
+          "pass",
+
+        message:
+          `${floorSnapshot.size} floor${
+            floorSnapshot.size ===
+            1 ?
+              "" :
+              "s"
+          } configured.`,
+      },
+    );
+  }
+
+  for (
+    const floorDoc of
+    floorSnapshot.docs
+  ) {
+    const floorId =
+      floorDoc.id;
+
+    const floor =
+      floorDoc.data();
+
+    const expectedBase =
+      `projects/${projectId}/floors/${floorId}`;
+
+    const spacesPath =
+      typeof floor.spacesUrl ===
+        "string" ?
+        floor.spacesUrl :
+        "";
+
+    const regionsPath =
+      typeof floor.regionsUrl ===
+        "string" ?
+        floor.regionsUrl :
+        "";
+
+    const panelTestsPath =
+      typeof floor
+        .panelTestsUrl ===
+        "string" ?
+        floor.panelTestsUrl :
+        "";
+
+    const planPath =
+      typeof floor.planPath ===
+        "string" ?
+        floor.planPath :
+        "";
+
+    const expectedPaths = [
+      {
+        id:
+          "spaces",
+
+        label:
+          "Commissioning data",
+
+        path:
+          spacesPath,
+
+        expected:
+          `${expectedBase}/data/spaces.json`,
+      },
+
+      {
+        id:
+          "regions",
+
+        label:
+          "Clickable regions",
+
+        path:
+          regionsPath,
+
+        expected:
+          `${expectedBase}/data/regions.json`,
+      },
+
+      {
+        id:
+          "panel-tests",
+
+        label:
+          "ELE-panel data",
+
+        path:
+          panelTestsPath,
+
+        expected:
+          `${expectedBase}/data/panel-tests.json`,
+      },
+
+      {
+        id:
+          "plan",
+
+        label:
+          "Floor plan",
+
+        path:
+          planPath,
+
+        expected:
+          `${expectedBase}/plans/base.svg`,
+      },
+    ];
+
+    for (
+      const asset of
+      expectedPaths
+    ) {
+      const validPath =
+        asset.path ===
+        asset.expected;
+
+      const exists =
+        validPath ?
+          await storageFileExists(
+            asset.path,
+          ) :
+          false;
+
+      validationCheck(
+        checks,
+        {
+          id:
+            `${floorId}-${asset.id}`,
+
+          category:
+            "Project files",
+
+          floorId,
+
+          label:
+            `${floorId} · ${asset.label}`,
+
+          status:
+            validPath &&
+            exists ?
+              "pass" :
+              "error",
+
+          message:
+            !validPath ?
+              `Expected ${asset.expected}.` :
+              exists ?
+                `${asset.label} found.` :
+                `${asset.label} is missing from Storage.`,
+        },
+      );
+    }
+
+    const jsonFilesReady =
+      await Promise.all([
+        storageFileExists(
+          spacesPath,
+        ),
+
+        storageFileExists(
+          regionsPath,
+        ),
+
+        storageFileExists(
+          panelTestsPath,
+        ),
+      ]);
+
+    if (
+      !jsonFilesReady.every(
+        Boolean,
+      )
+    ) {
+      continue;
+    }
+
+    try {
+      const [
+        rawSpaces,
+        rawRegions,
+        rawPanelTests,
+      ] =
+        await Promise.all([
+          readStorageJson(
+            spacesPath,
+          ),
+
+          readStorageJson(
+            regionsPath,
+          ),
+
+          readStorageJson(
+            panelTestsPath,
+          ),
+        ]);
+
+      const spacesData =
+        rawSpaces as Record<
+          string,
+          unknown
+        >;
+
+      const regionsData =
+        rawRegions as Record<
+          string,
+          unknown
+        >;
+
+      const panelData =
+        rawPanelTests as Record<
+          string,
+          unknown
+        >;
+
+      if (
+        spacesData.floor !==
+          floorId ||
+        regionsData.floor !==
+          floorId ||
+        panelData.floor !==
+          floorId
+      ) {
+        validationCheck(
+          checks,
+          {
+            id:
+              `${floorId}-floor-id-match`,
+
+            category:
+              "Data integrity",
+
+            floorId,
+
+            label:
+              `${floorId} · Floor IDs`,
+
+            status:
+              "error",
+
+            message:
+              "One or more project files contain a different floor ID.",
+          },
+        );
+
+        continue;
+      }
+
+      const spaces =
+        objectArray(
+          spacesData.spaces,
+        );
+
+      const regions =
+        objectArray(
+          regionsData.regions,
+        );
+
+      const panelSpaces =
+        objectArray(
+          panelData.spaces,
+        );
+
+      const regionIds =
+        new Set(
+          regions
+            .map(
+              (region) =>
+                typeof region.id ===
+                  "string" ?
+                  region.id :
+                  "",
+            )
+            .filter(
+              Boolean,
+            ),
+        );
+
+      const missingSpaceRegions =
+        spaces.filter(
+          (space) => {
+            const regionId =
+              typeof space.regionId ===
+                "string" ?
+                space.regionId :
+                "";
+
+            return (
+              !regionId ||
+              !regionIds.has(
+                regionId,
+              )
+            );
+          },
+        );
+
+      validationCheck(
+        checks,
+        {
+          id:
+            `${floorId}-space-region-links`,
+
+          category:
+            "Data integrity",
+
+          floorId,
+
+          label:
+            `${floorId} · Space mapping`,
+
+          status:
+            missingSpaceRegions.length ===
+            0 ?
+              "pass" :
+              "error",
+
+          message:
+            missingSpaceRegions.length === 0 ?
+              `${spaces.length} spaces map to valid regions.` :
+              `${missingSpaceRegions.length} spaces have missing regions.`,
+        },
+      );
+
+      const invalidPanelRegions =
+        panelSpaces.filter(
+          (space) => {
+            const regionId =
+              typeof space.regionId ===
+                "string" ?
+                space.regionId :
+                "";
+
+            return (
+              !regionId ||
+              !regionIds.has(
+                regionId,
+              )
+            );
+          },
+        );
+
+      validationCheck(
+        checks,
+        {
+          id:
+            `${floorId}-panel-region-links`,
+
+          category:
+            "Data integrity",
+
+          floorId,
+
+          label:
+            `${floorId} · Panel mapping`,
+
+          status:
+            invalidPanelRegions.length ===
+            0 ?
+              "pass" :
+              "error",
+
+          message:
+            invalidPanelRegions.length === 0 ?
+              `${panelSpaces.length} panel spaces map correctly.` :
+              `${invalidPanelRegions.length} panel spaces missing regions.`,
+        },
+      );
+
+      /*
+       * Validate panel screenshots
+       * without making one Storage
+       * request per image.
+       */
+      const panelPrefix =
+        `${expectedBase}/panel-reference/`;
+
+      const [
+        existingPanelFiles,
+      ] =
+        await getStorage()
+          .bucket()
+          .getFiles({
+            prefix:
+              panelPrefix,
+          });
+
+      const existingPaths =
+        new Set(
+          existingPanelFiles.map(
+            (file) =>
+              file.name,
+          ),
+        );
+
+      const missingReferences:
+        string[] = [];
+
+      for (
+        const panelSpace of
+        panelSpaces
+      ) {
+        const reference =
+          typeof panelSpace
+            .referenceImageUrl ===
+          "string" ?
+            panelSpace
+              .referenceImageUrl :
+            "";
+
+        if (!reference) {
+          continue;
+        }
+
+        if (
+          !reference.startsWith(
+            panelPrefix,
+          ) ||
+          !existingPaths.has(
+            reference,
+          )
+        ) {
+          missingReferences.push(
+            reference,
+          );
+        }
+      }
+
+      validationCheck(
+        checks,
+        {
+          id:
+            `${floorId}-panel-images`,
+
+          category:
+            "Project files",
+
+          floorId,
+
+          label:
+            `${floorId} · Panel references`,
+
+          status:
+            missingReferences.length ===
+            0 ?
+              "pass" :
+              "error",
+
+          message:
+            missingReferences.length === 0 ?
+              "All referenced panel images are available." :
+              `${missingReferences.length} panel images are missing.`,
+        },
+      );
+    } catch (error) {
+      validationCheck(
+        checks,
+        {
+          id:
+            `${floorId}-json-integrity`,
+
+          category:
+            "Data integrity",
+
+          floorId,
+
+          label:
+            `${floorId} · File integrity`,
+
+          status:
+            "error",
+
+          message:
+            error instanceof
+            Error ?
+              error.message :
+              "Floor JSON files could not be validated.",
+        },
+      );
+    }
+  }
+
+  const blockerCount =
+    checks.filter(
+      (check) =>
+        check.status ===
+        "error",
+    ).length;
+
+  const warningCount =
+    checks.filter(
+      (check) =>
+        check.status ===
+        "warning",
+    ).length;
+
+  return {
+    readyForPublish:
+      blockerCount === 0,
+
+    blockerCount,
+
+    warningCount,
+
+    checks,
+  };
 }
 
 /**
@@ -383,6 +1153,41 @@ function requireFloorLabel(
   }
 
   return label;
+}
+
+/**
+ * Returns object entries from an array value.
+ *
+ * @param {*} value Value to inspect.
+ * @return {Array<object>} Object entries.
+ */
+function objectArray(
+  value: unknown,
+): Array<
+  Record<
+    string,
+    unknown
+  >
+> {
+  if (
+    !Array.isArray(
+      value,
+    )
+  ) {
+    return [];
+  }
+
+  return value.filter(
+    (
+      item,
+    ): item is Record<
+      string,
+      unknown
+    > =>
+      typeof item ===
+        "object" &&
+      item !== null,
+  );
 }
 
 export const grantProjectAccess =
@@ -2085,5 +2890,74 @@ export const configureProjectSpreadsheet =
       return {
         success: true,
       };
+    },
+  );
+
+export const validateProjectSetup =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (
+        !request.auth
+      ) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before validating project setup.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data
+            ?.projectId,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const result =
+        await validateProjectSetupInternal(
+          projectId,
+        );
+
+      await db
+        .doc(
+          `projects/${projectId}`,
+        )
+        .set(
+          {
+            lastValidation: {
+              readyForPublish:
+                result
+                  .readyForPublish,
+
+              blockerCount:
+                result
+                  .blockerCount,
+
+              warningCount:
+                result
+                  .warningCount,
+
+              checkedBy:
+                request.auth
+                  .uid,
+
+              checkedAt:
+                FieldValue
+                  .serverTimestamp(),
+            },
+          },
+          {
+            merge:
+              true,
+          },
+        );
+
+      return result;
     },
   );

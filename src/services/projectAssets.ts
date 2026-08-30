@@ -7,6 +7,70 @@ import {
   firebaseStorage,
 } from "../auth/firebase";
 
+export interface LoadedAssetUrl {
+  url: string;
+  revoke: boolean;
+}
+
+function isBrowserUrl(
+  assetReference: string,
+): boolean {
+  return (
+    assetReference.startsWith("/") ||
+    assetReference.startsWith("http://") ||
+    assetReference.startsWith("https://") ||
+    assetReference.startsWith("blob:") ||
+    assetReference.startsWith("data:")
+  );
+}
+
+async function fetchPublicAsset(
+  assetReference: string,
+): Promise<Blob> {
+  const response =
+    await fetch(
+      assetReference,
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      `Asset could not be loaded (${response.status}).`,
+    );
+  }
+
+  return response.blob();
+}
+
+async function loadAssetBlob(
+  assetReference: string,
+): Promise<Blob> {
+  const trimmed =
+    assetReference.trim();
+
+  if (!trimmed) {
+    throw new Error(
+      "Asset path is empty.",
+    );
+  }
+
+  if (
+    isBrowserUrl(
+      trimmed,
+    )
+  ) {
+    return fetchPublicAsset(
+      trimmed,
+    );
+  }
+
+  return getBlob(
+    ref(
+      firebaseStorage,
+      trimmed,
+    ),
+  );
+}
+
 export async function loadProtectedBlob(
   storagePath: string,
 ): Promise<Blob> {
@@ -52,61 +116,56 @@ export async function loadProtectedObjectUrl(
 export async function loadJsonAsset<T>(
   assetReference: string,
 ): Promise<T> {
-  /*
-   * Temporary backwards compatibility:
-   *
-   * /projects/... = old public URL
-   * anything else = protected Storage path
-   */
+  const blob =
+    await loadAssetBlob(
+      assetReference,
+    );
 
-  if (
-    assetReference.startsWith("/")
-  ) {
-    const response =
-      await fetch(assetReference);
+  const text =
+    await blob.text();
 
-    if (!response.ok) {
-      throw new Error(
-        `Asset could not be loaded: ${assetReference}`,
-      );
-    }
-
-    return response.json() as Promise<T>;
+  try {
+    return JSON.parse(
+      text,
+    ) as T;
+  } catch {
+    throw new Error(
+      `JSON asset "${assetReference}" could not be parsed.`,
+    );
   }
-
-  return loadProtectedJson<T>(
-    assetReference,
-  );
 }
 
 export async function loadImageAsset(
   assetReference: string,
-): Promise<{
-  url: string;
-  revoke: boolean;
-}> {
+): Promise<LoadedAssetUrl> {
+  const trimmed =
+    assetReference.trim();
+
+  /*
+   * Existing public Keystone
+   * paths remain backwards-compatible.
+   */
   if (
-    assetReference.startsWith("/") ||
-    assetReference.startsWith("http://") ||
-    assetReference.startsWith("https://")
+    isBrowserUrl(
+      trimmed,
+    )
   ) {
     return {
-      url: assetReference,
+      url: trimmed,
       revoke: false,
     };
   }
 
-  const blob = 
-    await getBlob(
-      ref(
-        firebaseStorage,
-        assetReference,
-      ),
+  const blob =
+    await loadAssetBlob(
+      trimmed,
     );
 
   return {
     url:
-      URL.createObjectURL(blob),
+      URL.createObjectURL(
+        blob,
+      ),
 
     revoke: true,
   };
