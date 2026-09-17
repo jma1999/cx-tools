@@ -6,6 +6,7 @@ import {
 import {
   Link,
   useParams,
+  useNavigate,
 } from "react-router-dom";
 
 import {
@@ -26,6 +27,7 @@ import {
   commitCommissioningImport,
   configureProjectSpreadsheet,
   validateProjectSetup,
+  publishProject,
 } from "../services/projectAdmin";
 
 import type {
@@ -143,7 +145,7 @@ export default function ProjectSetupPage() {
   const [
     activeStep,
     setActiveStep,
-  ] = useState<2 | 3 | 4 | 5>(2);
+  ] = useState<2 | 3 | 4 | 5 | 6>(2);
 
   const [
     importingWorkbook,
@@ -207,6 +209,18 @@ export default function ProjectSetupPage() {
   ] =
     useState(false);
 
+  const navigate = useNavigate();
+
+  const [ 
+    publishingProject,
+    setPublishingProject,
+  ] = useState(false);
+
+  const [
+    publishConfirmed,
+    setPublishConfirmed,
+  ] = useState(false);
+
   async function loadSetup(
     showPageLoader = true,
   ): Promise<void> {
@@ -240,6 +254,20 @@ export default function ProjectSetupPage() {
 
       const data =
         projectSnapshot.data();
+
+      if (
+        data.status ===
+        "active"
+      ) {
+        navigate(
+          `/projects/${projectSnapshot.id}`,
+          {
+            replace: true,
+          },
+        );
+
+        return;
+      }
 
       setProject({
         id:
@@ -599,7 +627,9 @@ export default function ProjectSetupPage() {
             `setup-step ${
               activeStep === 5
                 ? "active"
-                : ""
+                : activeStep > 5
+                  ? "complete"
+                  : ""
             }`
           }
         >
@@ -612,6 +642,31 @@ export default function ProjectSetupPage() {
 
             <small>
               Run checks
+            </small>
+          </div>
+        </div>
+
+        <div
+          className={
+            `setup-step ${
+              activeStep === 6
+                ? "active"
+                : ""
+            }`
+          }
+        >
+          <span>6</span>
+
+          <div>
+            <strong>
+              Publish
+            </strong>
+
+            <small>
+              {project.status ===
+              "active"
+                ? "Published"
+                : "Pending"}
             </small>
           </div>
         </div>
@@ -1772,12 +1827,238 @@ export default function ProjectSetupPage() {
               <button
                 type="button"
                 className="primary-button"
-                disabled
+                disabled={!projectReadyForPublish}
+                onClick={() =>
+                  setActiveStep(6)
+                }
               >
                 Continue to publish →
               </button>
             </div>
           )}
+        </>
+      )}
+
+      {activeStep === 6 && (
+        <>
+          <button
+            type="button"
+            className="setup-back-button"
+            disabled={
+              publishingProject
+            }
+            onClick={() =>
+              setActiveStep(5)
+            }
+          >
+            ← Back to validation
+          </button>
+
+          <section className="admin-section">
+            <div className="admin-section-heading">
+              <div>
+                <h2>
+                  Publish project
+                </h2>
+
+                <p>
+                  Publishing makes this
+                  project available to its
+                  commissioning team.
+                </p>
+              </div>
+            </div>
+
+            <div className="publish-project-card">
+              <div className="publish-ready-heading">
+                <span className="publish-ready-icon">
+                  ✓
+                </span>
+
+                <div>
+                  <strong>
+                    Ready to publish
+                  </strong>
+
+                  <p>
+                    cxTools has validated
+                    the project's files,
+                    commissioning data,
+                    mappings and Google
+                    Sheet configuration.
+                  </p>
+                </div>
+              </div>
+
+              <div className="publish-summary-grid">
+                <div>
+                  <span>
+                    Project
+                  </span>
+
+                  <strong>
+                    {project.name}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Floors
+                  </span>
+
+                  <strong>
+                    {floors.length}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Validation blockers
+                  </span>
+
+                  <strong>
+                    0
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Warnings
+                  </span>
+
+                  <strong>
+                    {validationResult
+                      ?.warningCount ??
+                      0}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="publish-behaviour-note">
+                <strong>
+                  What happens next?
+                </strong>
+
+                <p>
+                  The project will move
+                  from Draft to Active and
+                  appear in the normal
+                  Projects workspace for
+                  assigned team members.
+                </p>
+              </div>
+
+              <label className="publish-confirmation">
+                <input
+                  type="checkbox"
+                  checked={
+                    publishConfirmed
+                  }
+                  disabled={
+                    publishingProject
+                  }
+                  onChange={(
+                    event,
+                  ) =>
+                    setPublishConfirmed(
+                      event.target
+                        .checked,
+                    )
+                  }
+                />
+
+                <span>
+                  I have reviewed the
+                  project setup and am
+                  ready to make it active.
+                </span>
+              </label>
+
+              <button
+                type="button"
+                className="primary-button publish-project-button"
+                disabled={
+                  publishingProject ||
+                  !publishConfirmed
+                }
+                onClick={async () => {
+                  if (
+                    !projectId
+                  ) {
+                    return;
+                  }
+
+                  setPublishingProject(
+                    true,
+                  );
+
+                  setError("");
+                  setMessage("");
+
+                  try {
+                    const result =
+                      await publishProject(
+                        projectId,
+                      );
+
+                    setMessage(
+                      "Project published successfully.",
+                    );
+
+                    /*
+                    * Publishing has
+                    * succeeded. Open the
+                    * actual project rather
+                    * than leaving the user
+                    * inside setup.
+                    */
+                    navigate(
+                      `/projects/${result.projectId}`,
+                    );
+                  } catch (err) {
+                    console.error(
+                      "Project publishing failed:",
+                      err,
+                    );
+
+                    setError(
+                      err instanceof
+                      Error
+                        ? err.message
+                        : "The project could not be published.",
+                    );
+
+                    /*
+                    * A server-side
+                    * validation failure
+                    * means something may
+                    * have changed after
+                    * Step 5.
+                    */
+                    setActiveStep(
+                      5,
+                    );
+
+                    setValidationResult(
+                      null,
+                    );
+
+                    setValidationSheetResult(
+                      null,
+                    );
+                  } finally {
+                    setPublishingProject(
+                      false,
+                    );
+                  }
+                }}
+              >
+                {publishingProject
+                  ? "Publishing…"
+                  : "Publish project"}
+              </button>
+            </div>
+          </section>
         </>
       )}
 

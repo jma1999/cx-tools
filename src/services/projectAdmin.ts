@@ -103,6 +103,12 @@ export interface ProjectValidationResult {
   checks: ProjectValidationCheck[];
 }
 
+export interface PublishProjectResult {
+  success: boolean;
+  projectId: string;
+  status: "active";
+  warningCount: number;
+}
 
 interface GrantProjectAccessInput {
   projectId: string;
@@ -277,6 +283,18 @@ const validateProjectSetupCallable =
     "validateProjectSetup",
   );
 
+const publishProjectCallable =
+  httpsCallable<
+    {
+      projectId:
+        string;
+    },
+    PublishProjectResult
+  >(
+    firebaseFunctions,
+    "publishProject",
+  );
+
 export async function configureProjectSpreadsheet(
   projectId: string,
   spreadsheetId: string,
@@ -405,6 +423,17 @@ export async function validateProjectSetup(
 ): Promise<ProjectValidationResult> {
   const response =
     await validateProjectSetupCallable({
+      projectId,
+    });
+
+  return response.data;
+}
+
+export async function publishProject(
+  projectId: string,
+): Promise<PublishProjectResult> {
+  const response =
+    await publishProjectCallable({
       projectId,
     });
 
