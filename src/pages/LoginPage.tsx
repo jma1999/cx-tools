@@ -166,7 +166,7 @@ export default function LoginPage() {
           RBGB
         </p>
 
-        <h1>Welcome to cxTools</h1>
+        <h1>Welcome to cxTools!</h1>
 
         <p>
           Commissioning workflows, field testing, and project coordination.
