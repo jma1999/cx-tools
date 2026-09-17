@@ -8,9 +8,7 @@ import {
 } from "react";
 
 import {
-  GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
   signOut as firebaseSignOut,
   type User,
 } from "firebase/auth";
@@ -20,7 +18,6 @@ import { firebaseAuth } from "./firebase";
 interface AuthContextValue {
   appUser: User | null;
   loading: boolean;
-  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -31,12 +28,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(
 interface AuthProviderProps {
   children: ReactNode;
 }
-
-const googleProvider = new GoogleAuthProvider();
-
-googleProvider.setCustomParameters({
-  prompt: "select_account",
-});
 
 export function AuthProvider({
   children,
@@ -65,13 +56,6 @@ export function AuthProvider({
     return unsubscribe;
   }, []);
 
-  async function signIn(): Promise<void> {
-    await signInWithPopup(
-      firebaseAuth,
-      googleProvider,
-    );
-  }
-
   async function signOut(): Promise<void> {
     await firebaseSignOut(firebaseAuth);
   }
@@ -80,7 +64,6 @@ export function AuthProvider({
     () => ({
       appUser,
       loading,
-      signIn,
       signOut,
     }),
     [appUser, loading],

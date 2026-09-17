@@ -2259,6 +2259,17 @@ export const upsertProjectFloor =
         );
       }
 
+      if (
+        projectSnapshot.data()
+          ?.status !==
+        "draft"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Project floors can only be changed while the project is in draft.",
+        );
+      }
+
       const floorRef =
         db.doc(
           `projects/${projectId}/floors/${floorId}`,
@@ -2665,6 +2676,33 @@ export const commitProjectFloorAssets =
         projectId,
       );
 
+      const projectSnapshot =
+        await db
+          .doc(
+            `projects/${projectId}`,
+          )
+          .get();
+
+      if (
+        !projectSnapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          "The project could not be found.",
+        );
+      }
+
+      if (
+        projectSnapshot.data()
+          ?.status !==
+        "draft"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Project files can only be changed while the project is in draft.",
+        );
+      }
+
       const planPath =
         typeof request.data
           ?.planPath ===
@@ -2959,5 +2997,217 @@ export const validateProjectSetup =
         );
 
       return result;
+    },
+  );
+
+export const publishProject =
+  onCall(
+    {
+      invoker: "public",
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError(
+          "unauthenticated",
+          "Sign in before publishing a project.",
+        );
+      }
+
+      const projectId =
+        requireProjectId(
+          request.data?.projectId,
+        );
+
+      await requireProjectAdmin(
+        request.auth.uid,
+        projectId,
+      );
+
+      const projectRef =
+        db.doc(
+          `projects/${projectId}`,
+        );
+
+      const initialSnapshot =
+        await projectRef.get();
+
+      if (
+        !initialSnapshot.exists
+      ) {
+        throw new HttpsError(
+          "not-found",
+          "The project could not be found.",
+        );
+      }
+
+      if (
+        initialSnapshot.data()
+          ?.status !== "draft"
+      ) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Only draft projects can be published.",
+        );
+      }
+
+      /*
+       * IMPORTANT:
+       * Never trust a previous
+       * validation result stored
+       * by the browser.
+       *
+       * Publishing always runs
+       * authoritative validation
+       * again.
+       */
+      const validation =
+        await validateProjectSetupInternal(
+          projectId,
+        );
+
+      if (
+        !validation
+          .readyForPublish
+      ) {
+        const blockerMessage =
+          "Project cannot be published because " +
+          `${validation.blockerCount} validation blocker${
+            validation.blockerCount ===
+            1 ?
+              "" :
+              "s"
+          } remain.`;
+
+        throw new HttpsError(
+          "failed-precondition",
+          blockerMessage,
+          {
+            validation,
+          },
+        );
+      }
+
+      const auditRef =
+        db.collection(
+          `projects/${projectId}/auditEvents`,
+        ).doc();
+
+      /*
+       * Transaction prevents two
+       * simultaneous publish actions
+       * from both succeeding.
+       */
+      await db.runTransaction(
+        async (
+          transaction,
+        ) => {
+          const latestSnapshot =
+            await transaction.get(
+              projectRef,
+            );
+
+          if (
+            !latestSnapshot.exists
+          ) {
+            throw new HttpsError(
+              "not-found",
+              "The project could not be found.",
+            );
+          }
+
+          if (
+            latestSnapshot.data()
+              ?.status !==
+            "draft"
+          ) {
+            throw new HttpsError(
+              "failed-precondition",
+              "This project is no longer in draft.",
+            );
+          }
+
+          transaction.set(
+            projectRef,
+            {
+              status:
+                "active",
+
+              publishedBy:
+                request.auth!
+                  .uid,
+
+              publishedAt:
+                FieldValue.serverTimestamp(),
+
+              updatedBy:
+                request.auth!
+                  .uid,
+
+              updatedAt:
+                FieldValue.serverTimestamp(),
+
+              lastValidation: {
+                readyForPublish:
+                  true,
+
+                blockerCount:
+                  0,
+
+                warningCount:
+                  validation
+                    .warningCount,
+
+                checkedBy:
+                  request.auth!
+                    .uid,
+
+                checkedAt:
+                  FieldValue.serverTimestamp(),
+              },
+            },
+            {
+              merge: true,
+            },
+          );
+
+          transaction.set(
+            auditRef,
+            {
+              eventType:
+                "project_published",
+
+              performedBy:
+                request.auth!
+                  .uid,
+
+              validation: {
+                blockerCount:
+                  validation
+                    .blockerCount,
+
+                warningCount:
+                  validation
+                    .warningCount,
+              },
+
+              createdAt:
+                FieldValue.serverTimestamp(),
+            },
+          );
+        },
+      );
+
+      return {
+        success: true,
+
+        projectId,
+
+        status:
+          "active" as const,
+
+        warningCount:
+          validation
+            .warningCount,
+      };
     },
   );
