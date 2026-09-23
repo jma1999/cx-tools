@@ -214,6 +214,11 @@ import {
         "spreadsheetId",
         `projects/${projectId}`,
       ),
+
+      dataBackend:
+        projectData.dataBackend === "firestore"
+          ? "firestore"
+          : "google-sheets",
   
       status,
       floors,

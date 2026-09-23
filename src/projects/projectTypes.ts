@@ -16,6 +16,7 @@ export interface ProjectConfig {
   spreadsheetId: string;
   status?: ProjectStatus;
   floors: ProjectFloor[];
+  dataBackend: ProjectDataBackend;
 }
 
 export type ProjectRole =
@@ -27,6 +28,10 @@ export type ProjectStatus =
   | "active"
   | "archived";
 
+export type ProjectDataBackend =
+  | "google-sheets"
+  | "firestore";
+  
 export interface ProjectMembership {
   projectId: string;
   role: ProjectRole;
