@@ -1150,7 +1150,7 @@ export default function FloorPlan({
     }
 
     setSyncStatus("saving");
-    setSyncMessage("Saving assignment to Google Sheets…");
+    setSyncMessage("Saving assignments…");
 
     try {
       await repository.upsertAssignment({
