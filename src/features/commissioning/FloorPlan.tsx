@@ -57,6 +57,8 @@ interface FloorPlanProps {
   repository: CommissioningRepository;
   googleUser: GoogleUser | null;
   onConnectGoogle: () => void;
+  sharedDataLabel: string;
+  canConnectSharedData: boolean;
 }
 
 const STATUS_STYLES: Record<
@@ -579,6 +581,8 @@ export default function FloorPlan({
   repository,
   googleUser,
   onConnectGoogle,
+  sharedDataLabel,
+  canConnectSharedData,
 }: FloorPlanProps) {
 
   const {
@@ -614,9 +618,9 @@ export default function FloorPlan({
     null,
   );
   const [loadError, setLoadError] = useState("");
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>("disconnected");
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("loading");
   const [syncMessage, setSyncMessage] = useState(
-    "Connect Google Sheets to load shared data.",
+    "Loading shared project data...",
   );
   const [comments, setComments] = useState<SheetComment[]>([]);
   const [commentText, setCommentText] = useState("");
@@ -814,8 +818,18 @@ export default function FloorPlan({
 
   useEffect(() => {
     if (!googleUser || !regionData || !floorData) {
-      setSyncStatus("disconnected");
-      setSyncMessage("Connect Google Sheets to load shared data.");
+      setSyncStatus(
+        canConnectSharedData
+          ? "disconnected"
+          : "loading",
+      );
+
+      setSyncMessage(
+        canConnectSharedData
+          ? "Connect to load shared project data."
+          : "Loading shared project data…",
+      );
+
       return;
     }
 
@@ -823,7 +837,7 @@ export default function FloorPlan({
 
     async function syncFromGoogle(): Promise<void> {
       setSyncStatus("loading");
-      setSyncMessage("Loading assignments and inspections from Google Sheets…");
+      setSyncMessage("Shared project data synced. Loading…");
 
       try {
         const [
@@ -865,7 +879,7 @@ export default function FloorPlan({
         setPanelIssues(cloudPanelIssues);
         setFloorData(applyInspectionData(floorData, cloudResults, cloudIssues));
         setSyncStatus("synced");
-        setSyncMessage(`Shared data synced as ${googleUser.email}.`);
+        setSyncMessage(`Shared project data synced.`);
       } catch (error) {
         if (cancelled) {
           return;
@@ -1408,7 +1422,7 @@ export default function FloorPlan({
           ? `Inspection saved and ${createdIssues.length} issue${
               createdIssues.length === 1 ? "" : "s"
             } raised.`
-          : "Inspection saved to Google Sheets.",
+          : "Inspection saved.",
       );
     } catch (error) {
       setSyncStatus("error");
@@ -1525,7 +1539,7 @@ export default function FloorPlan({
           ? `Testing saved and ${createdIssues.length} issue${
               createdIssues.length === 1 ? "" : "s"
             } raised.`
-          : "Testing results saved to Google Sheets.",
+          : "Testing results saved.",
       );
     } catch (error) {
       setSyncStatus("error");
@@ -1711,7 +1725,7 @@ export default function FloorPlan({
                 ? ""
                 : "s"
             } raised.`
-          : "Panel testing saved to Google Sheets.",
+          : "Panel testing saved.",
       );
     } catch (error) {
       setSyncStatus("error");
@@ -1738,7 +1752,7 @@ export default function FloorPlan({
     }
 
     setSyncStatus("saving");
-    setSyncMessage("Resolving issue in Google Sheets…");
+    setSyncMessage("Resolving issue…");
 
     try {
       const resolved = await repository.resolveIssue(issue.issueId, googleUser.email);
@@ -2092,10 +2106,10 @@ export default function FloorPlan({
       <aside className="side-panel">
         <div className={`cloud-sync-card ${syncStatus}`}>
           <div>
-            <strong>Google Sheets</strong>
+            <strong>{sharedDataLabel}</strong>
             <p>{syncMessage}</p>
           </div>
-          {!googleUser && (
+          {canConnectSharedData && !googleUser && (
             <button
               type="button"
               className="secondary-button"
@@ -2459,7 +2473,7 @@ function AssignmentPanel({
 
       <div className="data-actions">
         <button type="button" className="secondary-button" onClick={onReload}>
-          Reload from Google Sheets
+          Reloading shared project data...
         </button>
         <button type="button" className="secondary-button" onClick={onExport}>
           Export Floor {floor} assignments
