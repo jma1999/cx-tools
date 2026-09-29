@@ -16,6 +16,8 @@ import {
   type GoogleUser,
 } from "../services/googleSheets";
 
+import { createFirestoreCommissioningRepository } from "../services/firestoreCommissioningRepository";
+
 type AuthStatus =
   | "initializing"
   | "disconnected"
@@ -34,16 +36,35 @@ export default function ProjectWorkspace() {
 
   const repository = useMemo(
     () =>
-      createGoogleSheetsRepository(
-        project.spreadsheetId,
-      ),
-    [project.spreadsheetId],
+      project.dataBackend === "firestore"
+        ? createFirestoreCommissioningRepository(
+            project.id,
+          )
+        : createGoogleSheetsRepository(
+            project.spreadsheetId,
+          ),
+    [
+      project.id,
+      project.dataBackend,
+      project.spreadsheetId,
+    ],
   );
 
   const { appUser, signOut } = useAuth();
 
   const [googleUser, setGoogleUser] =
     useState<GoogleUser | null>(null);
+  
+  const sharedUser: GoogleUser | null =
+    project.dataBackend === "firestore"
+      ? appUser?.email
+        ? {
+            email: appUser.email,
+            name: appUser.displayName ?? undefined,
+            picture: appUser.photoURL ?? undefined,
+          }
+        : null
+      : googleUser;
 
   const [authStatus, setAuthStatus] =
     useState<AuthStatus>("initializing");
@@ -181,9 +202,18 @@ export default function ProjectWorkspace() {
         regionDataUrl={selectedFloor.regionsUrl}
         panelTestsUrl={selectedFloor.panelTestsUrl}
         repository={repository}
-        googleUser={googleUser}
+        googleUser={sharedUser}
         onConnectGoogle={() =>
           void handleConnectGoogle()
+        }
+        sharedDataLabel={
+          project.dataBackend === "firestore"
+            ? "cxTools Cloud"
+            : "Google Sheets"
+        }
+
+        canConnectSharedData={
+          project.dataBackend === "google-sheets"
         }
       />
     </main>

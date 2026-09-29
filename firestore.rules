@@ -24,6 +24,33 @@ service cloud.firestore {
         ).data.role in roles;
     }
 
+    function cxRuntimeMember(projectId) {
+      return request.auth != null
+        && exists(
+          /databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)
+        )
+        && get(
+          /databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)
+        ).data.active == true;
+    }
+
+    function cxRuntimeEditor(projectId) {
+      return cxRuntimeMember(projectId)
+        && get(
+          /databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)
+        ).data.role in [
+          "admin",
+          "editor"
+        ];
+    }
+
+    function cxRuntimeAdmin(projectId) {
+      return cxRuntimeMember(projectId)
+        && get(
+          /databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)
+        ).data.role == "admin";
+    }
+
     match /projects/{projectId} {
       /*
        * Project documents are read individually,
@@ -56,6 +83,120 @@ service cloud.firestore {
             projectId,
             ["admin"]
           );
+      }
+
+      match /floors/{floorId}/assignments/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create, update:
+          if cxRuntimeAdmin(projectId)
+          && request.resource.data.updatedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/comments/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.createdByUid
+            == request.auth.uid;
+
+        allow update, delete:
+          if false;
+      }
+
+      match /floors/{floorId}/checklistResults/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create, update:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.updatedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/testResults/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create, update:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.updatedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/panelTestResults/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create, update:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.updatedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/issues/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.createdByUid
+            == request.auth.uid;
+
+        allow update:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.resolvedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/panelIssues/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.createdByUid
+            == request.auth.uid;
+
+        allow update:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.resolvedByUid
+            == request.auth.uid;
+
+        allow delete:
+          if false;
+      }
+
+      match /floors/{floorId}/activityEvents/{recordId} {
+        allow read:
+          if cxRuntimeMember(projectId);
+
+        allow create:
+          if cxRuntimeEditor(projectId)
+          && request.resource.data.performedByUid
+            == request.auth.uid;
+
+        allow update, delete:
+          if false;
       }
     }
 
