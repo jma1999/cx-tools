@@ -235,7 +235,7 @@ import {
       SheetAssignment;
   
     await runTransaction(
-      firebaseDb,
+      firestoreDb,
       async (
         transaction,
       ) => {
@@ -499,7 +499,7 @@ import {
     R[] = [];
 
   await runTransaction(
-    firebaseDb,
+    firestoreDb,
     async (
       transaction,
     ) => {
@@ -893,7 +893,7 @@ async function loadFloorChecklistResults(
       SheetIssue;
   
     await runTransaction(
-      firebaseDb,
+      firestoreDb,
       async (
         transaction,
       ) => {
@@ -1202,7 +1202,7 @@ async function loadFloorChecklistResults(
       SheetPanelIssue;
   
     await runTransaction(
-      firebaseDb,
+      firestoreDb,
       async (
         transaction,
       ) => {
