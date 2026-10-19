@@ -351,6 +351,15 @@ async function validateProjectSetupInternal(
 
   const project =
     projectSnapshot.data()!;
+  
+  /*
+  * Projects without dataBackend are
+  * legacy Google Sheets projects.
+  */
+  const dataBackend =
+  project.dataBackend === "firestore" ?
+    "firestore" :
+    "google-sheets";
 
   validationCheck(
     checks,
@@ -408,41 +417,45 @@ async function validateProjectSetupInternal(
     },
   );
 
-  validationCheck(
-    checks,
-    {
-      id:
-        "google-sheet",
-
-      category:
-        "Google Sheet",
-
-      label:
-        "Google Sheet configuration",
-
-      status:
-        project
-          .googleSheetConfigured ===
-          true &&
-        typeof project
-          .spreadsheetId ===
-          "string" &&
-        Boolean(
-          project
-            .spreadsheetId
-            .trim(),
-        ) ?
-          "pass" :
-          "error",
-
-      message:
-        project
-          .googleSheetConfigured ===
-        true ?
-          "Google Sheet is configured." :
-          "Google Sheet has not been configured.",
-    },
-  );
+  if (dataBackend === "google-sheets") {
+    const googleSheetReady =
+      project.googleSheetConfigured === true &&
+      typeof project.spreadsheetId === "string" &&
+      Boolean(project.spreadsheetId.trim());
+  
+    validationCheck(
+      checks,
+      {
+        id: "google-sheet",
+        category: "Google Sheet",
+        label: "Google Sheet configuration",
+  
+        status:
+          googleSheetReady ?
+            "pass" :
+            "error",
+  
+        message:
+          googleSheetReady ?
+            "Google Sheet is configured." :
+            "This legacy project requires a configured Google Sheet.",
+      },
+    );
+  } else {
+    validationCheck(
+      checks,
+      {
+        id: "data-backend",
+        category: "Integration",
+        label: "cxTools Cloud",
+  
+        status: "pass",
+  
+        message:
+          "Firestore is configured as the project datastore.",
+      },
+    );
+  }
 
   const floorSnapshot =
     await db
@@ -2083,25 +2096,28 @@ export const createProject =
         projectRef,
         {
           name,
-
           code,
-
           description,
-
-          spreadsheetId,
-
+      
           status:
             "draft" satisfies ProjectStatus,
-
+      
+          // New projects use Firestore.
+          dataBackend: "firestore",
+      
+          // Google Sheets is optional.
+          spreadsheetId: "",
+          googleSheetConfigured: false,
+      
           createdBy:
             uid,
-
+      
           createdAt:
             FieldValue.serverTimestamp(),
-
+      
           updatedBy:
             uid,
-
+      
           updatedAt:
             FieldValue.serverTimestamp(),
         },
@@ -2181,21 +2197,19 @@ export const createProject =
 
       return {
         projectId,
-
+      
         project: {
-          id:
-            projectId,
-
+          id: projectId,
+      
           name,
-
           code,
-
           description,
-
-          spreadsheetId,
-
-          status:
-            "draft",
+      
+          status: "draft",
+      
+          dataBackend: "firestore",
+          spreadsheetId: "",
+          googleSheetConfigured: false,
         },
       };
     },
