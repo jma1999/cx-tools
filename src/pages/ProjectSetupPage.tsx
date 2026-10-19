@@ -69,6 +69,7 @@ interface SetupProject {
   spreadsheetId: string;
   status: string;
   googleSheetConfigured: boolean;
+  dataBackend: "firestore" | "google-sheets";
 }
 
 export default function ProjectSetupPage() {
@@ -306,6 +307,11 @@ export default function ProjectSetupPage() {
         googleSheetConfigured:
           data.googleSheetConfigured ===
           true,
+        
+        dataBackend:
+          data.dataBackend === "firestore"
+            ? "firestore"
+            : "google-sheets",
       });
 
       const floorSnapshot =
@@ -429,10 +435,10 @@ export default function ProjectSetupPage() {
     );
   
   const projectReadyForPublish =
-    Boolean(
-      validationResult
-        ?.readyForPublish &&
-      googleSheetValid,
+    Boolean(validationResult?.readyForPublish) &&
+    (
+      project?.dataBackend === "firestore" ||
+      googleSheetValid
     );
 
   async function handleAddFloor():
@@ -611,13 +617,17 @@ export default function ProjectSetupPage() {
 
           <div>
             <strong>
-              Google Sheet
+              Integrations
             </strong>
 
             <small>
-              {project.spreadsheetId
-                ? "Configured"
-                : "Not configured"}
+              {project.dataBackend === "firestore"
+                ? project.googleSheetConfigured
+                  ? "Google Sheet connected"
+                  : "Optional"
+                : project.googleSheetConfigured
+                  ? "Configured"
+                  : "Required"}
             </small>
           </div>
         </div>
@@ -1232,7 +1242,7 @@ export default function ProjectSetupPage() {
             disabled={!projectFilesReady}
             onClick={() => setActiveStep(4)}
           >
-            Continue to Google Sheet →
+            Continue to integrations →
           </button>
         </div>
       )}
@@ -1253,19 +1263,34 @@ export default function ProjectSetupPage() {
             <div className="admin-section-heading">
               <div>
                 <h2>
-                  Google Sheet
+                  Project integrations
                 </h2>
 
                 <p>
-                  Connect the shared Sheet
-                  where cxTools will store
-                  commissioning results,
-                  issues and activity.
+                  Connect optional external tools
+                  for reporting, exports, and interoperability.
                 </p>
               </div>
             </div>
 
+            {project.dataBackend === "firestore" && (
+              <div className="setup-info-card">
+                <strong>
+                  cxTools Cloud is active
+                </strong>
+
+                <p>
+                  Commissioning results, comments,
+                  issues, and activity are stored seurely in cxTools.
+                </p>
+              </div>
+            )}
+
             <div className="sheet-setup-card">
+              <strong>
+                Google Sheets
+                {project.dataBackend === "firestore" && " (Optional)"}
+              </strong>
               <label>
                 <span>
                   Google Sheet URL
@@ -1506,31 +1531,31 @@ export default function ProjectSetupPage() {
             )}
           </section>
 
-          {project.spreadsheetId &&
-            sheetSetupResult &&
-            sheetSetupResult
-              .issues.length ===
-              0 && (
-              <div className="setup-footer">
-                <span>
-                  Google Sheet configured
-                </span>
-
-                <button
-                  type="button"
-                  className="primary-button"
-                  disabled={
-                    !project.googleSheetConfigured ||
-                    !project.spreadsheetId
-                  }
-                  onClick={() =>
-                    setActiveStep(5)
-                  }
-                >
-                  Continue to validation →
-                </button>
-              </div>
-            )}
+          <div className="setup-footer">
+            <span>
+              {project.dataBackend === "firestore"
+                ? "Google Sheets is optional for this project"
+                : project.googleSheetConfigured &&
+                    Boolean(project.spreadsheetId.trim())
+                  ? "Google Sheet configured"
+                  : "A Google Sheet is required for this legacy project"}
+            </span>
+          
+            <button
+              type="button"
+              className="primary-button"
+              disabled={
+                project.dataBackend === "google-sheets" &&
+                !(
+                  project.googleSheetConfigured &&
+                  Boolean(project.spreadsheetId.trim())
+                )
+              }
+              onClick={() => setActiveStep(5)}
+            >
+              Continue to validation →
+            </button>
+          </div>
         </>
       )}
 
@@ -1568,11 +1593,9 @@ export default function ProjectSetupPage() {
                 </strong>
 
                 <p>
-                  Files, floor mappings,
-                  commissioning data,
-                  panel references and the
-                  shared Google Sheet will
-                  all be verified.
+                  {project.dataBackend === "firestore"
+                    ? "cxTools will verify project files, floor mappings, commissioning data, and panel references."
+                    : "cxTools will verify project files, floor mappings, commissioning data, panel references, and the required Google Sheet."}
                 </p>
               </div>
 
@@ -1583,11 +1606,7 @@ export default function ProjectSetupPage() {
                   runningValidation
                 }
                 onClick={async () => {
-                  if (
-                    !projectId ||
-                    !project
-                      .spreadsheetId
-                  ) {
+                  if (!projectId) {
                     return;
                   }
 
@@ -1599,49 +1618,46 @@ export default function ProjectSetupPage() {
                   setMessage("");
 
                   try {
-                    let googleUser =
-                      setupGoogleUser;
-
-                    if (
-                      !googleUser
-                    ) {
-                      googleUser =
-                        await connectGoogleSheets();
-
-                      setSetupGoogleUser(
-                        googleUser,
-                      );
+                    const projectResult =
+                      await validateProjectSetup(projectId);
+                  
+                    let sheetResult: GoogleSheetSetupResult | null = null;
+                  
+                    if (project.dataBackend === "google-sheets") {
+                      if (!project.spreadsheetId.trim()) {
+                        throw new Error(
+                          "This legacy project requires a configured Google Sheet.",
+                        );
+                      }
+                  
+                      if (!setupGoogleUser) {
+                        const googleUser =
+                          await connectGoogleSheets();
+                  
+                        setSetupGoogleUser(googleUser);
+                      }
+                  
+                      sheetResult =
+                        await validateCxToolsSpreadsheet(
+                          project.spreadsheetId,
+                        );
                     }
-
-                    const [
-                      projectResult,
-                      sheetResult,
-                    ] =
-                      await Promise.all([
-                        validateProjectSetup(
-                          projectId,
-                        ),
-
-                        validateCxToolsSpreadsheet(
-                          project
-                            .spreadsheetId,
-                        ),
-                      ]);
-
-                    setValidationResult(
-                      projectResult,
-                    );
-
-                    setValidationSheetResult(
-                      sheetResult,
-                    );
-
+                  
+                    setValidationResult(projectResult);
+                    setValidationSheetResult(sheetResult);
+                  
+                    const sheetReady =
+                      sheetResult !== null &&
+                      sheetResult.issues.length === 0 &&
+                      sheetResult.readySheets.length ===
+                        sheetResult.requiredSheetCount;
+                  
                     if (
-                      projectResult
-                        .readyForPublish &&
-                      sheetResult
-                        .issues.length ===
-                        0
+                      projectResult.readyForPublish &&
+                      (
+                        project.dataBackend === "firestore" ||
+                        sheetReady
+                      )
                     ) {
                       setMessage(
                         "Project passed all pre-publish checks.",
@@ -1693,15 +1709,12 @@ export default function ProjectSetupPage() {
                     </span>
 
                     <strong>
-                      {
-                        validationResult
-                          .blockerCount +
+                      {validationResult.blockerCount +
                         (
-                          validationSheetResult
-                            ?.issues.length ??
-                          0
-                        )
-                      }
+                          project.dataBackend === "google-sheets"
+                            ? validationSheetResult?.issues.length ?? 0
+                            : 0
+                        )}
                     </strong>
                   </div>
 
@@ -1758,8 +1771,8 @@ export default function ProjectSetupPage() {
                       ),
                     )}
 
-                  {validationSheetResult
-                    ?.issues.map(
+                  {project.dataBackend === "google-sheets" && 
+                    validationSheetResult?.issues.map(
                       (
                         issue,
                         index,
@@ -1792,7 +1805,8 @@ export default function ProjectSetupPage() {
                       ),
                     )}
 
-                  {googleSheetValid && (
+                  {project.dataBackend === "google-sheets" && 
+                    googleSheetValid && (
                     <div className="validation-check validation-pass">
                       <span className="validation-check-icon">
                         ✓
@@ -1881,11 +1895,9 @@ export default function ProjectSetupPage() {
                   </strong>
 
                   <p>
-                    cxTools has validated
-                    the project's files,
-                    commissioning data,
-                    mappings and Google
-                    Sheet configuration.
+                    {project.dataBackend === "firestore"
+                      ? "cxTools has validated the project's files, commissioning data, mappings, and Cloud datastore configuration."
+                      : "cxTools has validated the project's files, commissioning data, mappings, and Google Sheet configuration."}
                   </p>
                 </div>
               </div>
